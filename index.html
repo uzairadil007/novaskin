@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Skin — Skin, unhurried.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#2F4156;
+    --teal:#567C8D;
+    --beige:#F5EFEB;
+    --sky:#C8D9E6;
+    --white:#FFFFFF;
+    --navy-70: rgba(47,65,86,.7);
+    --navy-40: rgba(47,65,86,.4);
+    --navy-12: rgba(47,65,86,.12);
+    --teal-soft: rgba(86,124,141,.14);
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--beige);
+    color:var(--navy);
+    font-family:'Inter',sans-serif;
+    font-weight:400;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--navy); color:var(--beige); }
+
+  h1,h2,h3{ font-family:'Fraunces',serif; font-weight:500; letter-spacing:-0.01em; line-height:1.02; color:var(--navy); }
+  a{ color:inherit; text-decoration:none; }
+  img,svg{ display:block; max-width:100%; }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--teal);
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:''; width:22px; height:1px; background:var(--teal); display:inline-block; }
+
+  .wrap{ max-width:1240px; margin:0 auto; padding:0 40px; }
+  .wrap-bleed{ padding:0; }
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible, input:focus-visible{
+    outline:2px solid var(--teal); outline-offset:3px; border-radius:2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+  }
+
+  /* ---------------- NAV ---------------- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:22px 40px;
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(245,239,235,.72);
+    backdrop-filter:blur(14px) saturate(140%);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    border-bottom:1px solid rgba(47,65,86,.08);
+    transition:padding .4s var(--ease);
+  }
+  header.scrolled{ padding:14px 40px; }
+  .logo{
+    font-family:'Fraunces',serif; font-size:21px; font-weight:600; letter-spacing:.01em;
+    white-space:nowrap; flex-shrink:0;
+  }
+  .logo em{ font-style:italic; font-weight:400; color:var(--teal); }
+  nav.links{ display:flex; gap:38px; align-items:center; }
+  nav.links a{
+    font-size:13px; letter-spacing:.02em; color:var(--navy-70);
+    position:relative; padding:4px 0;
+    transition:color .3s var(--ease);
+  }
+  nav.links a::after{
+    content:''; position:absolute; left:0; bottom:0; width:0; height:1px;
+    background:var(--navy); transition:width .35s var(--ease);
+  }
+  nav.links a:hover{ color:var(--navy); }
+  nav.links a:hover::after{ width:100%; }
+  .nav-cta{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    border:1px solid var(--navy); padding:10px 18px; border-radius:100px;
+    transition:background .35s var(--ease), color .35s var(--ease);
+    white-space:nowrap; flex-shrink:0;
+  }
+  .nav-cta:hover{ background:var(--navy); color:var(--beige); }
+
+  .header-right{ display:flex; align-items:center; gap:14px; }
+  .burger{
+    display:none; width:38px; height:38px; border-radius:50%; border:1px solid var(--navy-40);
+    background:none; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+    padding:0;
+  }
+  .burger span{ position:relative; width:14px; height:10px; display:block; }
+  .burger span::before, .burger span::after{
+    content:''; position:absolute; left:0; right:0; height:1px; background:var(--navy);
+    transition:transform .3s var(--ease), top .3s var(--ease), opacity .3s var(--ease);
+  }
+  .burger span::before{ top:0; }
+  .burger span::after{ top:9px; }
+  .burger.open span::before{ top:4px; transform:rotate(45deg); }
+  .burger.open span::after{ top:4px; transform:rotate(-45deg); }
+
+  .mobile-nav{
+    display:none;
+    position:fixed; top:0; left:0; right:0; bottom:0; z-index:99;
+    background:var(--beige);
+    padding:110px 32px 40px;
+    flex-direction:column; gap:6px;
+    opacity:0; visibility:hidden; transform:translateY(-8px);
+    transition:opacity .35s var(--ease), transform .35s var(--ease), visibility 0s linear .35s;
+  }
+  .mobile-nav.open{ opacity:1; visibility:visible; transform:translateY(0); transition:opacity .35s var(--ease), transform .35s var(--ease); }
+  .mobile-nav a{
+    font-family:'Fraunces',serif; font-size:30px; font-weight:500; color:var(--navy);
+    padding:16px 0; border-bottom:1px solid rgba(47,65,86,.12);
+  }
+  .mobile-nav .nav-cta{ align-self:flex-start; margin-top:24px; }
+
+  /* ---------------- HERO ---------------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    align-items:center;
+    padding:140px 40px 80px;
+    max-width:1240px; margin:0 auto;
+    gap:40px;
+  }
+  .hero-copy .eyebrow{ margin-bottom:26px; opacity:0; animation:riseIn .9s var(--ease) .1s forwards; }
+  .hero-copy h1{
+    font-size:clamp(46px,6.6vw,92px);
+    margin-bottom:26px;
+  }
+  .hero-copy h1 span{ display:block; overflow:hidden; }
+  .hero-copy h1 span b{
+    display:block; font-weight:400; font-style:italic; color:var(--teal);
+    transform:translateY(110%); animation:slideUp .95s var(--ease) forwards;
+  }
+  .hero-copy h1 span:nth-child(1) b{ animation-delay:.15s; }
+  .hero-copy h1 span:nth-child(2) b{ animation-delay:.28s; font-style:normal; color:var(--navy);}
+  .hero-copy p.lede{
+    font-size:17px; line-height:1.65; color:var(--navy-70);
+    max-width:420px; margin-bottom:38px;
+    opacity:0; animation:riseIn .9s var(--ease) .5s forwards;
+  }
+  .hero-actions{ display:flex; gap:16px; align-items:center; opacity:0; animation:riseIn .9s var(--ease) .65s forwards; }
+
+  .btn-primary{
+    background:var(--navy); color:var(--beige);
+    font-size:13px; letter-spacing:.03em;
+    padding:16px 30px; border-radius:100px; border:none; cursor:pointer;
+    display:inline-flex; align-items:center; gap:10px;
+    transition:transform .4s var(--ease), background .4s var(--ease);
+  }
+  .btn-primary:hover{ background:var(--teal); transform:translateY(-2px); }
+  .btn-primary svg{ transition:transform .4s var(--ease); }
+  .btn-primary:hover svg{ transform:translateX(4px); }
+
+  .btn-ghost{
+    font-size:13px; letter-spacing:.02em; color:var(--navy);
+    display:inline-flex; align-items:center; gap:8px;
+    padding:16px 4px; background:none; border:none; cursor:pointer;
+  }
+  .btn-ghost .ring{
+    width:36px; height:36px; border-radius:50%; border:1px solid var(--navy-40);
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .3s var(--ease), transform .3s var(--ease);
+  }
+  .btn-ghost:hover .ring{ border-color:var(--navy); transform:scale(1.08); }
+
+  .hero-visual{ position:relative; height:560px; }
+  .ripple-field{ position:absolute; inset:-40px -20px; }
+  .bottle{
+    position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
+    width:210px; height:330px;
+    animation:floatY 6s ease-in-out infinite;
+  }
+  .bottle-body{
+    position:absolute; inset:0; border-radius:26px;
+    background:linear-gradient(160deg, var(--white) 0%, var(--sky) 130%);
+    box-shadow:0 40px 70px -25px rgba(47,65,86,.35), inset 0 0 0 1px rgba(255,255,255,.5);
+  }
+  .bottle-cap{
+    position:absolute; top:-34px; left:50%; transform:translateX(-50%);
+    width:96px; height:44px; border-radius:10px 10px 4px 4px;
+    background:var(--navy);
+  }
+  .bottle-label{
+    position:absolute; left:20px; right:20px; top:44%;
+    text-align:center;
+  }
+  .bottle-label .m{ font-family:'Fraunces',serif; font-style:italic; font-size:22px; color:var(--navy); }
+  .bottle-label .s{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.16em; color:var(--teal); margin-top:6px; }
+  .vlabel{
+    position:absolute; right:8%; top:8%;
+    writing-mode:vertical-rl;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; color:var(--teal);
+  }
+
+  @keyframes riseIn{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes slideUp{ to{ transform:translateY(0); } }
+  @keyframes floatY{ 0%,100%{ transform:translate(-50%,-50%) translateY(0);} 50%{ transform:translate(-50%,-50%) translateY(-16px);} }
+
+  /* ---------------- MARQUEE STRIP ---------------- */
+  .strip{
+    border-top:1px solid rgba(47,65,86,.12); border-bottom:1px solid rgba(47,65,86,.12);
+    overflow:hidden; padding:18px 0; background:var(--beige);
+  }
+  .marquee{ display:flex; gap:60px; white-space:nowrap; width:max-content; animation:scroll 26s linear infinite; }
+  .marquee span{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.14em; color:var(--navy-40); text-transform:uppercase;
+  }
+  @keyframes scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  /* ---------------- REVEAL utility ---------------- */
+  .reveal{ opacity:0; transform:translateY(26px); transition:opacity .9s var(--ease), transform .9s var(--ease); }
+  .reveal.in-view{ opacity:1; transform:translateY(0); }
+  .reveal-stagger > *{ opacity:0; transform:translateY(24px); transition:opacity .8s var(--ease), transform .8s var(--ease); }
+  .reveal-stagger.in-view > *{ opacity:1; transform:translateY(0); }
+  .reveal-stagger.in-view > *:nth-child(1){ transition-delay:.05s; }
+  .reveal-stagger.in-view > *:nth-child(2){ transition-delay:.15s; }
+  .reveal-stagger.in-view > *:nth-child(3){ transition-delay:.25s; }
+  .reveal-stagger.in-view > *:nth-child(4){ transition-delay:.35s; }
+
+  section{ padding:130px 0; position:relative; }
+  .section-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:40px; margin-bottom:64px; }
+  .section-head h2{ font-size:clamp(32px,3.6vw,50px); }
+  .section-head p{ max-width:320px; color:var(--navy-70); font-size:14.5px; line-height:1.6; }
+
+  /* ---------------- PHILOSOPHY ---------------- */
+  .philosophy{ background:var(--navy); color:var(--beige); }
+  .philosophy .wrap{ text-align:center; }
+  .philosophy .eyebrow{ justify-content:center; color:var(--sky); }
+  .philosophy .eyebrow::before{ background:var(--sky); }
+  .philosophy blockquote{
+    font-family:'Fraunces',serif; font-style:italic; font-weight:400;
+    font-size:clamp(26px,4vw,44px); line-height:1.35; max-width:880px; margin:34px auto 0;
+    color:var(--beige);
+  }
+  .philosophy blockquote b{ font-style:normal; color:var(--sky); font-weight:500; }
+
+  /* ---------------- PRODUCTS ---------------- */
+  .products-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:2px;
+    background:rgba(47,65,86,.12);
+    border:1px solid rgba(47,65,86,.12);
+  }
+  .product-card{
+    background:var(--beige); padding:34px 28px 30px; position:relative;
+    display:flex; flex-direction:column; min-height:460px;
+    transition:background .4s var(--ease);
+  }
+  .product-card:hover{ background:var(--white); }
+  .p-index{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--teal); margin-bottom:26px; }
+  .p-visual{
+    height:200px; border-radius:16px; margin-bottom:26px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+  }
+  .p-visual .jar{ width:76px; height:96px; border-radius:14px; box-shadow:0 20px 40px -18px rgba(47,65,86,.4); transition:transform .5s var(--ease); }
+  .product-card:hover .p-visual .jar{ transform:translateY(-6px) scale(1.05); }
+  .p-visual::after{
+    content:''; position:absolute; inset:0; opacity:0; background:radial-gradient(circle at 50% 30%, rgba(255,255,255,.5), transparent 60%);
+    transition:opacity .4s var(--ease);
+  }
+  .product-card:hover .p-visual::after{ opacity:1; }
+  .p1 .jar{ background:linear-gradient(155deg,var(--sky),var(--teal)); } .p1 .p-visual{ background:var(--teal-soft); }
+  .p2 .jar{ background:linear-gradient(155deg,var(--white),var(--sky)); } .p2 .p-visual{ background:rgba(200,217,230,.35); }
+  .p3 .jar{ background:linear-gradient(155deg,var(--sky),var(--navy)); } .p3 .p-visual{ background:rgba(47,65,86,.06); }
+  .p4 .jar{ background:linear-gradient(155deg,var(--teal),var(--navy)); } .p4 .p-visual{ background:rgba(86,124,141,.10); }
+
+  .product-card h3{ font-size:22px; margin-bottom:8px; }
+  .product-card .p-desc{ font-size:13.5px; color:var(--navy-70); line-height:1.55; margin-bottom:auto; padding-bottom:20px; }
+  .p-foot{ display:flex; align-items:center; justify-content:space-between; padding-top:18px; border-top:1px solid rgba(47,65,86,.12); }
+  .p-price{ font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  .p-add{
+    width:38px; height:38px; border-radius:50%; border:1px solid var(--navy);
+    display:flex; align-items:center; justify-content:center; background:none; cursor:pointer;
+    transition:background .35s var(--ease), transform .35s var(--ease);
+  }
+  .p-add:hover{ background:var(--navy); transform:rotate(90deg); }
+  .p-add:hover svg{ stroke:var(--beige); }
+  .p-add svg{ stroke:var(--navy); transition:stroke .3s; }
+
+  /* ---------------- RITUAL STEPS ---------------- */
+  .ritual{ background:var(--sky); }
+  .ritual-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:rgba(47,65,86,.15); border:1px solid rgba(47,65,86,.15);}
+  .ritual-step{ background:var(--sky); padding:44px 34px; }
+  .ritual-step .rn{ font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; color:var(--navy); opacity:.55; margin-bottom:60px; }
+  .ritual-step h3{ font-size:24px; margin-bottom:12px; }
+  .ritual-step p{ font-size:14px; color:var(--navy-70); line-height:1.6; }
+  .ritual-step .time{ display:inline-block; margin-top:22px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; padding:7px 14px; border-radius:100px; background:rgba(47,65,86,.08); }
+
+  /* ---------------- REFERRAL ---------------- */
+  .referral{ background:var(--beige); }
+  .referral-card{
+    background:var(--white); border-radius:28px; padding:64px;
+    display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;
+    box-shadow:0 60px 100px -60px rgba(47,65,86,.35);
+  }
+  .referral-form label{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--teal); display:block; margin-bottom:10px; }
+  .referral-input-row{ display:flex; gap:12px; margin-bottom:16px; }
+  .referral-input-row input{
+    flex:1; padding:16px 18px; border-radius:12px; border:1px solid rgba(47,65,86,.2);
+    background:var(--beige); font-family:'Inter',sans-serif; font-size:14px; color:var(--navy);
+    transition:border-color .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .referral-input-row input::placeholder{ color:var(--navy-40); }
+  .referral-input-row input:focus{ outline:none; border-color:var(--teal); box-shadow:0 0 0 4px var(--teal-soft); }
+  .referral-input-row button{
+    background:var(--navy); color:var(--beige); border:none; border-radius:12px; padding:0 26px;
+    font-size:13px; cursor:pointer; white-space:nowrap;
+    transition:background .3s var(--ease);
+  }
+  .referral-input-row button:hover{ background:var(--teal); }
+  .referral-hint{ font-size:12.5px; color:var(--navy-40); }
+  .referral-hint b{ color:var(--teal); font-weight:600; cursor:pointer; }
+
+  .bonus-panel{
+    background:var(--navy); border-radius:20px; padding:34px; color:var(--beige);
+    position:relative; overflow:hidden; min-height:280px;
+  }
+  .bonus-panel .glow{ position:absolute; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle, var(--teal), transparent 70%); opacity:.35; top:-60px; right:-60px; }
+  .bonus-state-empty{ display:flex; flex-direction:column; justify-content:center; align-items:flex-start; height:100%; gap:14px; position:relative; z-index:1; }
+  .bonus-state-empty p{ font-size:13.5px; color:var(--sky); max-width:230px; line-height:1.6; }
+  .bonus-result{ display:none; position:relative; z-index:1; }
+  .bonus-result.show{ display:block; animation:riseIn .6s var(--ease) forwards; }
+  .bonus-result .tier{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--sky); text-transform:uppercase; margin-bottom:6px; }
+  .bonus-result .amount{ font-family:'Fraunces',serif; font-size:52px; margin-bottom:20px; }
+  .bonus-result .row{ display:flex; justify-content:space-between; padding:12px 0; border-top:1px solid rgba(245,239,235,.14); font-size:13px; }
+  .bonus-result .row span:first-child{ color:var(--sky); }
+
+  /* ---------------- DASHBOARD ---------------- */
+  .dashboard{ background:var(--navy); color:var(--beige); }
+  .dashboard .eyebrow{ color:var(--sky); }
+  .dashboard .eyebrow::before{ background:var(--sky); }
+  .dashboard .section-head h2{ color:var(--beige); }
+  .dashboard .section-head p{ color:var(--sky); }
+
+  .dash-frame{
+    background:linear-gradient(180deg, rgba(245,239,235,.06), rgba(245,239,235,.02));
+    border:1px solid rgba(245,239,235,.14); border-radius:24px; padding:8px;
+  }
+  .dash-topbar{ display:flex; align-items:center; justify-content:space-between; padding:18px 22px; }
+  .dash-dots{ display:flex; gap:7px; }
+  .dash-dots span{ width:9px; height:9px; border-radius:50%; background:rgba(245,239,235,.25); }
+  .dash-title{ font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.08em; color:var(--sky); }
+
+  .dash-body{ background:var(--beige); border-radius:18px; padding:36px; color:var(--navy); }
+  .dash-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:30px; }
+  .stat-card{ background:var(--white); border-radius:16px; padding:24px 22px; }
+  .stat-card .s-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--teal); margin-bottom:14px; }
+  .stat-card .s-value{ font-family:'Fraunces',serif; font-size:32px; }
+  .stat-card .s-delta{ font-size:12px; color:var(--teal); margin-top:6px; }
+
+  .dash-lower{ display:grid; grid-template-columns:1.4fr 1fr; gap:18px; }
+  .chart-card{ background:var(--white); border-radius:16px; padding:26px 26px 18px; }
+  .chart-card .ch-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .chart-card .ch-head h4{ font-family:'Fraunces',serif; font-size:18px; font-weight:500; }
+  .chart-card .ch-head span{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--navy-40); }
+  .bars{ display:flex; align-items:flex-end; gap:10px; height:150px; }
+  .bars .bar{ flex:1; background:linear-gradient(180deg,var(--sky),var(--teal)); border-radius:6px 6px 2px 2px; transform:scaleY(0); transform-origin:bottom; transition:transform 1s var(--ease); }
+  .bars.in-view .bar{ transform:scaleY(1); }
+
+  .link-card{ background:var(--white); border-radius:16px; padding:26px; display:flex; flex-direction:column; }
+  .link-card h4{ font-family:'Fraunces',serif; font-size:18px; font-weight:500; margin-bottom:6px; }
+  .link-card p{ font-size:12.5px; color:var(--navy-70); margin-bottom:18px; line-height:1.5; }
+  .link-box{ display:flex; align-items:center; gap:8px; background:var(--beige); border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+  .link-box input{ flex:1; background:none; border:none; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--navy); }
+  .link-box input:focus{ outline:none; }
+  .copy-btn{ background:var(--navy); color:var(--beige); border:none; border-radius:8px; padding:8px 12px; font-size:11px; cursor:pointer; transition:background .3s; white-space:nowrap; }
+  .copy-btn:hover{ background:var(--teal); }
+  .link-card .tier-badge{ margin-top:auto; display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--teal); }
+  .tier-badge .dot{ width:7px; height:7px; border-radius:50%; background:var(--teal); }
+
+  /* ---------------- CTA BAND ---------------- */
+  .cta-band{ background:var(--beige); text-align:center; padding:150px 0; }
+  .cta-band h2{ font-size:clamp(36px,5vw,64px); margin-bottom:34px; }
+  .cta-band h2 em{ font-style:italic; color:var(--teal); }
+
+  /* ---------------- FOOTER ---------------- */
+  footer{ background:var(--navy); color:var(--sky); padding:70px 0 30px; }
+  .foot-grid{ display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px; margin-bottom:60px; }
+  footer .logo{ color:var(--beige); margin-bottom:14px; }
+  footer .foot-desc{ font-size:13px; line-height:1.6; max-width:260px; color:rgba(200,217,230,.7); }
+  footer h5{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:18px; color:var(--beige); }
+  footer ul{ list-style:none; display:flex; flex-direction:column; gap:11px; }
+  footer a{ font-size:13.5px; color:rgba(200,217,230,.75); transition:color .3s; }
+  footer a:hover{ color:var(--beige); }
+  .foot-bottom{ display:flex; justify-content:space-between; align-items:center; padding-top:26px; border-top:1px solid rgba(200,217,230,.15); font-size:12px; color:rgba(200,217,230,.5); }
+
+  /* wave divider */
+  .wave{ display:block; width:100%; height:70px; }
+
+  /* ---------------- TABLET ---------------- */
+  @media (max-width:980px){
+    header{ padding:18px 24px; }
+    nav.links{ display:none; }
+    .burger{ display:flex; }
+    .mobile-nav{ display:flex; }
+    .wrap{ padding:0 24px; }
+    .wrap-bleed{ padding:0 24px; }
+    .hero{ grid-template-columns:1fr; padding:118px 24px 56px; text-align:left; gap:56px; }
+    .hero-visual{ height:360px; order:-1; }
+    .products-grid{ grid-template-columns:repeat(2,1fr); }
+    .ritual-grid{ grid-template-columns:1fr; }
+    .referral-card{ grid-template-columns:1fr; padding:36px; border-radius:22px; gap:36px; }
+    .dash-stats{ grid-template-columns:repeat(2,1fr); }
+    .dash-lower{ grid-template-columns:1fr; }
+    .foot-grid{ grid-template-columns:1fr 1fr; row-gap:36px; }
+    section{ padding:88px 0; }
+    .cta-band{ padding:110px 0; }
+    .section-head{ flex-direction:column; align-items:flex-start; gap:14px; margin-bottom:48px; }
+    .section-head p{ max-width:100%; }
+  }
+
+  /* ---------------- MOBILE ---------------- */
+  @media (max-width:640px){
+    header{ padding:16px 20px; }
+    .logo{ font-size:18px; }
+    .header-right .nav-cta{ display:none; }
+    .mobile-nav{ padding:96px 26px 40px; }
+    .mobile-nav a{ font-size:26px; padding:14px 0; }
+    .wrap{ padding:0 20px; }
+    .wrap-bleed{ padding:0 20px; }
+
+    .hero{ padding:100px 20px 48px; gap:40px; min-height:auto; }
+    .hero-copy h1{ font-size:clamp(38px,11vw,54px); margin-bottom:20px; }
+    .hero-copy p.lede{ font-size:15.5px; max-width:100%; margin-bottom:30px; }
+    .hero-actions{ flex-wrap:wrap; gap:14px; }
+    .hero-visual{ height:280px; }
+    .bottle{ width:150px; height:236px; }
+    .bottle-cap{ width:70px; height:32px; top:-24px; }
+    .bottle-label .m{ font-size:17px; }
+    .bottle-label .s{ font-size:7.5px; }
+    .vlabel{ font-size:9px; right:2%; top:4%; }
+    .ripple-field{ inset:0; }
+
+    section{ padding:64px 0; }
+    .section-head{ margin-bottom:36px; }
+    .section-head h2{ font-size:clamp(28px,7vw,36px); }
+
+    .philosophy blockquote{ font-size:clamp(22px,6vw,30px); }
+
+    .products-grid{ grid-template-columns:1fr; }
+    .product-card{ padding:28px 22px; min-height:0; }
+    .p-visual{ height:170px; margin-bottom:20px; }
+
+    .ritual-step{ padding:32px 24px; }
+    .ritual-step .rn{ margin-bottom:34px; }
+
+    .referral-card{ padding:26px; gap:28px; }
+    .referral-input-row{ flex-direction:column; }
+    .referral-input-row button{ padding:14px; }
+    .bonus-panel{ min-height:0; padding:28px; }
+    .bonus-result .amount{ font-size:42px; }
+
+    .dash-frame{ border-radius:18px; }
+    .dash-body{ padding:20px; border-radius:14px; }
+    .dash-title{ font-size:10px; }
+    .dash-stats{ grid-template-columns:1fr 1fr; gap:12px; }
+    .stat-card{ padding:18px 16px; }
+    .stat-card .s-value{ font-size:24px; }
+    .dash-lower{ gap:12px; }
+    .chart-card, .link-card{ padding:20px; }
+    .bars{ height:120px; }
+
+    .cta-band{ padding:80px 0; }
+    .cta-band h2{ font-size:clamp(30px,9vw,40px); margin-bottom:26px; }
+
+    .foot-grid{ grid-template-columns:1fr; gap:32px; margin-bottom:40px; }
+    footer .foot-desc{ max-width:100%; }
+    .foot-bottom{ flex-direction:column; align-items:flex-start; gap:8px; }
+  }
+
+  @media (max-width:400px){
+    .dash-stats{ grid-template-columns:1fr; }
+    .bonus-result .amount{ font-size:36px; }
+  }
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <a href="#top" class="logo">nova<em> skin</em></a>
+  <nav class="links">
+    <a href="#ritual">Ritual</a>
+    <a href="#shop">Shop</a>
+    <a href="#partners">For Partners</a>
+    <a href="#dashboard">Dashboard</a>
+  </nav>
+  <div class="header-right">
+    <a href="#shop" class="nav-cta">Shop Now</a>
+    <button class="burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false"><span></span></button>
+  </div>
+</header>
+
+<nav class="mobile-nav" id="mobileNav">
+  <a href="#ritual">Ritual</a>
+  <a href="#shop">Shop</a>
+  <a href="#partners">For Partners</a>
+  <a href="#dashboard">Dashboard</a>
+  <a href="#shop" class="nav-cta">Shop Now</a>
+</nav>
+
+<section class="hero" id="top">
+  <div class="hero-copy">
+    <div class="eyebrow">Slow-formulated skincare</div>
+    <h1>
+      <span><b>Skin,</b></span>
+      <span><b>unhurried.</b></span>
+    </h1>
+    <p class="lede">Four formulas, built on marine minerals and patience. Nothing rushed, nothing wasted — just what your skin was already asking for.</p>
+    <div class="hero-actions">
+      <a href="#shop" class="btn-primary">Shop the ritual
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="#philosophy" class="btn-ghost">
+        <span class="ring">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F4156" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </span>
+        Our approach
+      </a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <svg class="ripple-field" viewBox="0 0 500 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="250" cy="280" r="230" stroke="#567C8D" stroke-opacity="0.18"/>
+      <circle cx="250" cy="280" r="180" stroke="#2F4156" stroke-opacity="0.10"/>
+      <circle cx="250" cy="280" r="130" stroke="#567C8D" stroke-opacity="0.14"/>
+    </svg>
+    <div class="vlabel">N&deg;01 — NOVA SKIN</div>
+    <div class="bottle">
+      <div class="bottle-cap"></div>
+      <div class="bottle-body">
+        <div class="bottle-label">
+          <div class="m">nova</div>
+          <div class="s">HYDRA SERUM · 30ML</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="strip">
+  <div class="marquee">
+    <span>Marine mineral complex</span><span>·</span><span>Dermatologist formulated</span><span>·</span><span>Cruelty free</span><span>·</span><span>Recyclable glass</span><span>·</span><span>Slow beauty</span><span>·</span>
+    <span>Marine mineral complex</span><span>·</span><span>Dermatologist formulated</span><span>·</span><span>Cruelty free</span><span>·</span><span>Recyclable glass</span><span>·</span><span>Slow beauty</span><span>·</span>
+  </div>
+</div>
+
+<section class="philosophy" id="philosophy">
+  <div class="wrap reveal">
+    <div class="eyebrow">The approach</div>
+    <blockquote>“We stopped chasing <b>more steps</b> and started asking what skin actually needed — then removed everything else.”</blockquote>
+  </div>
+</section>
+
+<section id="shop">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>The ritual, in four parts</h2>
+      <p>Each formula does one job well. Layer all four, or take only what your skin is asking for today.</p>
+    </div>
+  </div>
+  <div class="wrap wrap-bleed">
+    <div class="products-grid reveal-stagger">
+      <div class="product-card p1">
+        <div class="p-index">N&deg;01 — CLEANSE</div>
+        <div class="p-visual"><div class="jar"></div></div>
+        <h3>Tidal Cleanser</h3>
+        <p class="p-desc">A cream-to-foam wash with kelp amino acids. Lifts the day without stripping the barrier.</p>
+        <div class="p-foot">
+          <span class="p-price">$34</span>
+          <button class="p-add" aria-label="Add Tidal Cleanser to bag">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="product-card p2">
+        <div class="p-index">N&deg;02 — TREAT</div>
+        <div class="p-visual"><div class="jar"></div></div>
+        <h3>Hydra Serum</h3>
+        <p class="p-desc">Five-molecular-weight hyaluronic acid plus niacinamide. The one step that carries the rest.</p>
+        <div class="p-foot">
+          <span class="p-price">$58</span>
+          <button class="p-add" aria-label="Add Hydra Serum to bag">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="product-card p3">
+        <div class="p-index">N&deg;03 — SEAL</div>
+        <div class="p-visual"><div class="jar"></div></div>
+        <h3>Depth Cream</h3>
+        <p class="p-desc">A barrier cream built on ceramides and squalane. Rich without ever feeling heavy.</p>
+        <div class="p-foot">
+          <span class="p-price">$62</span>
+          <button class="p-add" aria-label="Add Depth Cream to bag">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="product-card p4">
+        <div class="p-index">N&deg;04 — DEFEND</div>
+        <div class="p-visual"><div class="jar"></div></div>
+        <h3>Horizon SPF 40</h3>
+        <p class="p-desc">A mineral finish with zero white cast. The last, non-negotiable step, every morning.</p>
+        <div class="p-foot">
+          <span class="p-price">$40</span>
+          <button class="p-add" aria-label="Add Horizon SPF to bag">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ritual" id="ritual">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>When it happens</h2>
+      <p>The order is the whole point — each step prepares your skin for the next.</p>
+    </div>
+  </div>
+  <div class="wrap wrap-bleed">
+    <div class="ritual-grid reveal-stagger">
+      <div class="ritual-step">
+        <div class="rn">01 / MORNING</div>
+        <h3>Wake the skin</h3>
+        <p>Tidal Cleanser, then Hydra Serum, sealed with Horizon SPF before you leave the house.</p>
+        <span class="time">2 MIN</span>
+      </div>
+      <div class="ritual-step">
+        <div class="rn">02 / EVENING</div>
+        <h3>Let it repair</h3>
+        <p>Cleanse away the day, layer the serum, and finish with Depth Cream while skin is still damp.</p>
+        <span class="time">3 MIN</span>
+      </div>
+      <div class="ritual-step">
+        <div class="rn">03 / WEEKLY</div>
+        <h3>Go deeper</h3>
+        <p>Double-cleanse on Sundays. Let the serum sit five minutes longer than usual. No rush.</p>
+        <span class="time">10 MIN</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="referral" id="partners">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">For partners</div>
+    </div>
+    <div class="referral-card reveal">
+      <div class="referral-form">
+        <h2 style="font-size:34px;margin-bottom:14px;">Check your referral bonus</h2>
+        <p style="color:var(--navy-70);font-size:14px;line-height:1.6;margin-bottom:30px;max-width:380px;">Enter the referral code you share with your community to see this month's earnings and tier.</p>
+        <label for="refCode">Referral code</label>
+        <div class="referral-input-row">
+          <input type="text" id="refCode" placeholder="e.g. NOVA-JOY21" autocomplete="off">
+          <button id="checkBonusBtn" type="button">Check bonus</button>
+        </div>
+        <p class="referral-hint">Don't have a code yet? <b id="applyDemo">Try a live example</b></p>
+      </div>
+      <div class="bonus-panel">
+        <div class="glow"></div>
+        <div class="bonus-state-empty" id="bonusEmpty">
+          <div class="eyebrow" style="color:var(--sky);">Awaiting code</div>
+          <p>Your tier, referral count, and bonus owed will appear here once we find your code.</p>
+        </div>
+        <div class="bonus-result" id="bonusResult">
+          <div class="tier">Gold Partner</div>
+          <div class="amount">$486<span style="font-size:18px;color:var(--sky);">.00</span></div>
+          <div class="row"><span>Referrals this month</span><span id="rRefs">23</span></div>
+          <div class="row"><span>Conversion rate</span><span id="rConv">31%</span></div>
+          <div class="row"><span>Next payout</span><span id="rPayout">Sep 1</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dashboard" id="dashboard">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <div class="eyebrow">Partner dashboard</div>
+        <h2 style="margin-top:16px;">Everything you're owed, in one place</h2>
+      </div>
+      <p>Track referrals, earnings, and payouts in real time — no spreadsheets, no waiting on us.</p>
+    </div>
+
+    <div class="dash-frame reveal">
+      <div class="dash-topbar">
+        <div class="dash-dots"><span></span><span></span><span></span></div>
+        <div class="dash-title">NOVA SKIN / PARTNER DASHBOARD</div>
+        <div style="width:40px;"></div>
+      </div>
+      <div class="dash-body">
+        <div class="dash-stats">
+          <div class="stat-card">
+            <div class="s-label">Total earnings</div>
+            <div class="s-value" data-count="4820" data-prefix="$">$0</div>
+            <div class="s-delta">+18% this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="s-label">Active referrals</div>
+            <div class="s-value" data-count="132">0</div>
+            <div class="s-delta">+9 this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="s-label">Conversion rate</div>
+            <div class="s-value" data-count="31" data-suffix="%">0%</div>
+            <div class="s-delta">Above average</div>
+          </div>
+          <div class="stat-card">
+            <div class="s-label">Next payout</div>
+            <div class="s-value" style="font-size:26px;">Sep 1</div>
+            <div class="s-delta">In 12 days</div>
+          </div>
+        </div>
+
+        <div class="dash-lower">
+          <div class="chart-card">
+            <div class="ch-head">
+              <h4>Earnings, last 6 months</h4>
+              <span>USD</span>
+            </div>
+            <div class="bars">
+              <div class="bar" style="height:38%"></div>
+              <div class="bar" style="height:52%"></div>
+              <div class="bar" style="height:44%"></div>
+              <div class="bar" style="height:68%"></div>
+              <div class="bar" style="height:76%"></div>
+              <div class="bar" style="height:100%"></div>
+            </div>
+          </div>
+          <div class="link-card">
+            <h4>Your referral link</h4>
+            <p>Share this link — every order through it is tracked automatically.</p>
+            <div class="link-box">
+              <input type="text" value="novaskin.co/r/joy21" readonly id="refLink">
+              <button class="copy-btn" id="copyLinkBtn">Copy</button>
+            </div>
+            <div class="tier-badge"><span class="dot"></span> Gold tier · 20% commission</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap reveal">
+    <h2>Ready when <em>you</em> are.</h2>
+    <a href="#shop" class="btn-primary">Start the ritual
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="logo">nova<em> skin</em></div>
+        <p class="foot-desc">Slow-formulated skincare, built on marine minerals. Four steps, no more.</p>
+      </div>
+      <div>
+        <h5>Shop</h5>
+        <ul>
+          <li><a href="#shop">Cleanser</a></li>
+          <li><a href="#shop">Serum</a></li>
+          <li><a href="#shop">Cream</a></li>
+          <li><a href="#shop">SPF</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#philosophy">Philosophy</a></li>
+          <li><a href="#ritual">The ritual</a></li>
+          <li><a href="#partners">Partners</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Support</h5>
+        <ul>
+          <li><a href="#">Shipping</a></li>
+          <li><a href="#">Returns</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Nova Skin Co.</span>
+      <span>Made slowly, on the coast.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // header scroll state
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive:true });
+
+  // mobile nav toggle
+  const burgerBtn = document.getElementById('burgerBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  function closeMobileNav(){
+    burgerBtn.classList.remove('open');
+    mobileNav.classList.remove('open');
+    burgerBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+  burgerBtn.addEventListener('click', () => {
+    const isOpen = mobileNav.classList.toggle('open');
+    burgerBtn.classList.toggle('open', isOpen);
+    burgerBtn.setAttribute('aria-expanded', String(isOpen));
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  });
+  mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileNav));
+
+  // scroll reveal
+  const revealEls = document.querySelectorAll('.reveal, .reveal-stagger, .bars');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.classList.add('in-view');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold:.2 });
+  revealEls.forEach(el => io.observe(el));
+
+  // count-up stats
+  const statEls = document.querySelectorAll('.s-value[data-count]');
+  const countIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        const el = e.target;
+        const target = parseInt(el.dataset.count, 10);
+        const prefix = el.dataset.prefix || '';
+        const suffix = el.dataset.suffix || '';
+        const dur = 1400;
+        const start = performance.now();
+        function tick(now){
+          const p = Math.min((now - start) / dur, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          const val = Math.round(target * eased);
+          el.textContent = prefix + val.toLocaleString() + suffix;
+          if(p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        countIO.unobserve(el);
+      }
+    });
+  }, { threshold:.4 });
+  statEls.forEach(el => countIO.observe(el));
+
+  // referral bonus checker
+  const checkBtn = document.getElementById('checkBonusBtn');
+  const refInput = document.getElementById('refCode');
+  const bonusEmpty = document.getElementById('bonusEmpty');
+  const bonusResult = document.getElementById('bonusResult');
+  const applyDemo = document.getElementById('applyDemo');
+
+  function revealBonus(){
+    if(!refInput.value.trim()) {
+      refInput.focus();
+      return;
+    }
+    bonusResult.classList.add('show');
+    bonusEmpty.style.display = 'none';
+  }
+  checkBtn.addEventListener('click', revealBonus);
+  refInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') revealBonus(); });
+  applyDemo.addEventListener('click', () => {
+    refInput.value = 'NOVA-JOY21';
+    revealBonus();
+  });
+
+  // copy referral link
+  const copyBtn = document.getElementById('copyLinkBtn');
+  const refLink = document.getElementById('refLink');
+  copyBtn.addEventListener('click', () => {
+    refLink.select();
+    navigator.clipboard?.writeText(refLink.value).catch(()=>{});
+    const original = copyBtn.textContent;
+    copyBtn.textContent = 'Copied';
+    setTimeout(() => { copyBtn.textContent = original; }, 1600);
+  });
+</script>
+
+</body>
+</html>
