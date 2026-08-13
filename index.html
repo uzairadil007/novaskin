@@ -6,7 +6,7 @@
 <title>Nova Skin — Skin, unhurried.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --navy:#2F4156;
@@ -19,21 +19,27 @@
     --navy-12: rgba(47,65,86,.12);
     --teal-soft: rgba(86,124,141,.14);
     --ease: cubic-bezier(.22,1,.36,1);
+    --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-secondary: 'Fraunces', serif;
   }
 
   *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth; font-size:16px;}
   body{
     background:var(--beige);
     color:var(--navy);
-    font-family:'Inter',sans-serif;
+    font-family:var(--font-main);
     font-weight:400;
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
   }
   ::selection{ background:var(--navy); color:var(--beige); }
 
-  h1,h2,h3{ font-family:'Fraunces',serif; font-weight:500; letter-spacing:-0.01em; line-height:1.02; color:var(--navy); }
+  h1,h2,h3{ font-family:var(--font-main); font-weight:700; letter-spacing:-0.01em; line-height:1.05; color:var(--navy); }
+  /* "main words" — key emphasized words inside a heading — stay in the main font, bold + italic */
+  h1 em, h2 em, h3 em, h1 i, h2 i, h3 i, .accent-word{
+    font-family:var(--font-main); font-style:italic; font-weight:700; letter-spacing:0; color:var(--teal);
+  }
   a{ color:inherit; text-decoration:none; }
   img,svg{ display:block; max-width:100%; }
 
@@ -72,13 +78,13 @@
   }
   header.scrolled{ padding:14px 40px; }
   .logo{
-    font-family:'Fraunces',serif; font-size:21px; font-weight:600; letter-spacing:.01em;
+    font-family:var(--font-main); font-size:21px; font-weight:700; letter-spacing:.01em;
     white-space:nowrap; flex-shrink:0;
   }
-  .logo em{ font-style:italic; font-weight:400; color:var(--teal); }
+  .logo em{ font-family:var(--font-secondary); font-style:italic; font-weight:400; color:var(--teal); }
   nav.links{ display:flex; gap:38px; align-items:center; }
   nav.links a{
-    font-size:13px; letter-spacing:.02em; color:var(--navy-70);
+    font-family:var(--font-main); font-weight:700; font-size:13px; letter-spacing:.02em; color:var(--navy-70);
     position:relative; padding:4px 0;
     transition:color .3s var(--ease);
   }
@@ -97,6 +103,116 @@
   .nav-cta:hover{ background:var(--navy); color:var(--beige); }
 
   .header-right{ display:flex; align-items:center; gap:14px; }
+
+  /* ---------------- CART ---------------- */
+  .cart-btn{
+    position:relative; width:38px; height:38px; border-radius:50%; border:1px solid var(--navy-40);
+    background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+    color:var(--navy); padding:0; transition:border-color .3s var(--ease), background .3s var(--ease);
+  }
+  .cart-btn:hover{ border-color:var(--navy); background:rgba(47,65,86,.06); }
+  .cart-count{
+    position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 4px; border-radius:50%;
+    background:var(--navy); color:var(--beige); font-family:var(--font-main); font-weight:700; font-size:10px;
+    display:flex; align-items:center; justify-content:center; line-height:1;
+    transform:scale(0); transition:transform .3s var(--ease);
+  }
+  .cart-count.show{ transform:scale(1); }
+
+  .cart-overlay{
+    position:fixed; inset:0; z-index:200; background:rgba(47,65,86,.35); border:none; padding:0; cursor:default;
+    opacity:0; visibility:hidden; transition:opacity .35s var(--ease), visibility 0s linear .35s;
+  }
+  .cart-overlay.open{ opacity:1; visibility:visible; transition:opacity .35s var(--ease); }
+
+  .cart-drawer{
+    position:fixed; top:0; right:0; bottom:0; z-index:201; width:min(420px,100vw);
+    background:var(--beige); box-shadow:-30px 0 60px -30px rgba(47,65,86,.4);
+    display:flex; flex-direction:column;
+    transform:translateX(100%); transition:transform .45s var(--ease);
+  }
+  .cart-drawer.open{ transform:translateX(0); }
+  .cart-drawer-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:26px 28px; border-bottom:1px solid rgba(47,65,86,.12);
+  }
+  .cart-drawer-head h3{ font-family:var(--font-main); font-weight:700; font-size:19px; }
+  .cart-close{
+    width:34px; height:34px; border-radius:50%; border:1px solid var(--navy-40); background:none;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--navy);
+    transition:border-color .3s var(--ease), transform .3s var(--ease);
+  }
+  .cart-close:hover{ border-color:var(--navy); transform:rotate(90deg); }
+  .cart-drawer-body{ flex:1; overflow-y:auto; padding:12px 28px; }
+  .cart-empty{ height:100%; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:8px; padding:40px 0; }
+  .cart-empty p{ font-family:var(--font-main); font-weight:700; font-size:16px; }
+  .cart-empty span{ font-size:13px; color:var(--navy-70); }
+  .cart-item{
+    display:flex; align-items:center; gap:14px; padding:18px 0; border-bottom:1px solid rgba(47,65,86,.1);
+  }
+  .cart-item-swatch{ width:46px; height:56px; border-radius:10px; flex-shrink:0; background:linear-gradient(155deg,var(--sky),var(--teal)); }
+  .cart-item-info{ flex:1; min-width:0; }
+  .cart-item-info .ci-name{ font-family:var(--font-main); font-weight:700; font-size:14px; margin-bottom:2px; }
+  .cart-item-info .ci-price{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--teal); }
+  .cart-item-qty{ display:flex; align-items:center; gap:8px; }
+  .cart-item-qty button{
+    width:24px; height:24px; border-radius:50%; border:1px solid var(--navy-40); background:none; cursor:pointer;
+    font-family:var(--font-main); font-weight:700; font-size:13px; color:var(--navy); line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cart-item-qty button:hover{ border-color:var(--navy); }
+  .cart-item-qty span{ font-family:'IBM Plex Mono',monospace; font-size:12px; min-width:14px; text-align:center; }
+  .cart-item-remove{
+    background:none; border:none; cursor:pointer; color:var(--navy-40); font-size:11px;
+    font-family:var(--font-main); text-decoration:underline; padding:0; margin-left:8px;
+  }
+  .cart-item-remove:hover{ color:var(--navy); }
+  .cart-drawer-foot{ padding:22px 28px 28px; border-top:1px solid rgba(47,65,86,.12); }
+  .cart-subtotal-row{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;
+    font-family:var(--font-main); font-weight:700; font-size:15px;
+  }
+  .cart-checkout{ width:100%; justify-content:center; }
+  .cart-checkout:disabled{ opacity:.55; cursor:not-allowed; }
+  .cart-checkout:disabled:hover{ background:var(--navy); transform:none; }
+  .cart-note{ font-size:11.5px; color:var(--navy-40); text-align:center; margin-top:12px; }
+  .cart-error{ color:#b3443a; }
+
+  /* checkout form step */
+  .checkout-note{ font-size:12.5px; color:var(--navy-70); line-height:1.5; margin-bottom:20px; }
+  .checkout-view .field{ margin-bottom:14px; }
+  .checkout-view label{
+    display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--teal); margin-bottom:6px;
+  }
+  .checkout-view input, .checkout-view textarea{
+    width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--navy-40);
+    background:var(--white); font-family:var(--font-main); font-size:13.5px; color:var(--navy);
+  }
+  .checkout-view input:focus, .checkout-view textarea:focus{ outline:none; border-color:var(--teal); }
+  .checkout-view textarea{ resize:vertical; min-height:56px; font-family:var(--font-main); }
+  .checkout-summary{
+    margin-top:8px; padding-top:16px; border-top:1px solid rgba(47,65,86,.12);
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--navy-70); line-height:1.9;
+  }
+  .checkout-summary .cs-row{ display:flex; justify-content:space-between; }
+  .checkout-summary .cs-total{ color:var(--navy); font-weight:700; border-top:1px solid rgba(47,65,86,.12); margin-top:6px; padding-top:8px; }
+  .link-back{
+    background:none; border:none; cursor:pointer; padding:0; margin-bottom:14px; display:block;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--teal);
+  }
+  .link-back:hover{ color:var(--navy); }
+
+  /* success step */
+  .success-view{ height:100%; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:10px; padding:30px 0; }
+  .success-icon{
+    width:44px; height:44px; border-radius:50%; background:var(--teal); color:var(--beige);
+    display:flex; align-items:center; justify-content:center; font-size:18px; margin-bottom:4px;
+  }
+  .success-view h4{ font-family:var(--font-main); font-weight:700; font-size:18px; }
+  .success-view p{ font-size:13px; color:var(--navy-70); line-height:1.55; }
+  .success-warning{ color:#b3443a !important; }
+
   .burger{
     display:none; width:38px; height:38px; border-radius:50%; border:1px solid var(--navy-40);
     background:none; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
@@ -123,7 +239,7 @@
   }
   .mobile-nav.open{ opacity:1; visibility:visible; transform:translateY(0); transition:opacity .35s var(--ease), transform .35s var(--ease); }
   .mobile-nav a{
-    font-family:'Fraunces',serif; font-size:30px; font-weight:500; color:var(--navy);
+    font-family:var(--font-secondary); font-size:30px; font-weight:500; color:var(--navy);
     padding:16px 0; border-bottom:1px solid rgba(47,65,86,.12);
   }
   .mobile-nav .nav-cta{ align-self:flex-start; margin-top:24px; }
@@ -146,7 +262,7 @@
   }
   .hero-copy h1 span{ display:block; overflow:hidden; }
   .hero-copy h1 span b{
-    display:block; font-weight:400; font-style:italic; color:var(--teal);
+    display:block; font-family:var(--font-main); font-weight:700; font-style:italic; color:var(--teal);
     transform:translateY(110%); animation:slideUp .95s var(--ease) forwards;
   }
   .hero-copy h1 span:nth-child(1) b{ animation-delay:.15s; }
@@ -181,10 +297,10 @@
   }
   .btn-ghost:hover .ring{ border-color:var(--navy); transform:scale(1.08); }
 
-  .hero-visual{ position:relative; height:560px; }
-  .ripple-field{ position:absolute; inset:-40px -20px; }
+  .hero-visual{ position:relative; height:560px; display:flex; align-items:center; justify-content:center; }
+  .ripple-field{ position:absolute; inset:-40px -20px; pointer-events:none; }
   .bottle{
-    position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
+    position:relative; z-index:1;
     width:210px; height:330px;
     animation:floatY 6s ease-in-out infinite;
   }
@@ -202,7 +318,7 @@
     position:absolute; left:20px; right:20px; top:44%;
     text-align:center;
   }
-  .bottle-label .m{ font-family:'Fraunces',serif; font-style:italic; font-size:22px; color:var(--navy); }
+  .bottle-label .m{ font-family:var(--font-secondary); font-style:italic; font-size:22px; color:var(--navy); }
   .bottle-label .s{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.16em; color:var(--teal); margin-top:6px; }
   .vlabel{
     position:absolute; right:8%; top:8%;
@@ -212,7 +328,7 @@
 
   @keyframes riseIn{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
   @keyframes slideUp{ to{ transform:translateY(0); } }
-  @keyframes floatY{ 0%,100%{ transform:translate(-50%,-50%) translateY(0);} 50%{ transform:translate(-50%,-50%) translateY(-16px);} }
+  @keyframes floatY{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-16px);} }
 
   /* ---------------- MARQUEE STRIP ---------------- */
   .strip{
@@ -246,7 +362,7 @@
   .philosophy .eyebrow{ justify-content:center; color:var(--sky); }
   .philosophy .eyebrow::before{ background:var(--sky); }
   .philosophy blockquote{
-    font-family:'Fraunces',serif; font-style:italic; font-weight:400;
+    font-family:var(--font-secondary); font-style:italic; font-weight:400;
     font-size:clamp(26px,4vw,44px); line-height:1.35; max-width:880px; margin:34px auto 0;
     color:var(--beige);
   }
@@ -315,7 +431,7 @@
   .referral-input-row{ display:flex; gap:12px; margin-bottom:16px; }
   .referral-input-row input{
     flex:1; padding:16px 18px; border-radius:12px; border:1px solid rgba(47,65,86,.2);
-    background:var(--beige); font-family:'Inter',sans-serif; font-size:14px; color:var(--navy);
+    background:var(--beige); font-family:var(--font-main); font-size:14px; color:var(--navy);
     transition:border-color .3s var(--ease), box-shadow .3s var(--ease);
   }
   .referral-input-row input::placeholder{ color:var(--navy-40); }
@@ -339,7 +455,7 @@
   .bonus-result{ display:none; position:relative; z-index:1; }
   .bonus-result.show{ display:block; animation:riseIn .6s var(--ease) forwards; }
   .bonus-result .tier{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--sky); text-transform:uppercase; margin-bottom:6px; }
-  .bonus-result .amount{ font-family:'Fraunces',serif; font-size:52px; margin-bottom:20px; }
+  .bonus-result .amount{ font-family:var(--font-secondary); font-size:52px; margin-bottom:20px; }
   .bonus-result .row{ display:flex; justify-content:space-between; padding:12px 0; border-top:1px solid rgba(245,239,235,.14); font-size:13px; }
   .bonus-result .row span:first-child{ color:var(--sky); }
 
@@ -363,20 +479,20 @@
   .dash-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:30px; }
   .stat-card{ background:var(--white); border-radius:16px; padding:24px 22px; }
   .stat-card .s-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--teal); margin-bottom:14px; }
-  .stat-card .s-value{ font-family:'Fraunces',serif; font-size:32px; }
+  .stat-card .s-value{ font-family:var(--font-secondary); font-size:32px; }
   .stat-card .s-delta{ font-size:12px; color:var(--teal); margin-top:6px; }
 
   .dash-lower{ display:grid; grid-template-columns:1.4fr 1fr; gap:18px; }
   .chart-card{ background:var(--white); border-radius:16px; padding:26px 26px 18px; }
   .chart-card .ch-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-  .chart-card .ch-head h4{ font-family:'Fraunces',serif; font-size:18px; font-weight:500; }
+  .chart-card .ch-head h4{ font-family:var(--font-secondary); font-size:18px; font-weight:500; }
   .chart-card .ch-head span{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--navy-40); }
   .bars{ display:flex; align-items:flex-end; gap:10px; height:150px; }
   .bars .bar{ flex:1; background:linear-gradient(180deg,var(--sky),var(--teal)); border-radius:6px 6px 2px 2px; transform:scaleY(0); transform-origin:bottom; transition:transform 1s var(--ease); }
   .bars.in-view .bar{ transform:scaleY(1); }
 
   .link-card{ background:var(--white); border-radius:16px; padding:26px; display:flex; flex-direction:column; }
-  .link-card h4{ font-family:'Fraunces',serif; font-size:18px; font-weight:500; margin-bottom:6px; }
+  .link-card h4{ font-family:var(--font-secondary); font-size:18px; font-weight:500; margin-bottom:6px; }
   .link-card p{ font-size:12.5px; color:var(--navy-70); margin-bottom:18px; line-height:1.5; }
   .link-box{ display:flex; align-items:center; gap:8px; background:var(--beige); border-radius:10px; padding:12px 14px; margin-bottom:10px; }
   .link-box input{ flex:1; background:none; border:none; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--navy); }
@@ -400,7 +516,9 @@
   footer ul{ list-style:none; display:flex; flex-direction:column; gap:11px; }
   footer a{ font-size:13.5px; color:rgba(200,217,230,.75); transition:color .3s; }
   footer a:hover{ color:var(--beige); }
-  .foot-bottom{ display:flex; justify-content:space-between; align-items:center; padding-top:26px; border-top:1px solid rgba(200,217,230,.15); font-size:12px; color:rgba(200,217,230,.5); }
+  .foot-bottom{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px 20px; padding-top:26px; border-top:1px solid rgba(200,217,230,.15); font-size:12px; color:rgba(200,217,230,.5); }
+  .foot-bottom a{ color:rgba(200,217,230,.5); transition:color .3s; }
+  .foot-bottom a:hover{ color:var(--beige); }
 
   /* wave divider */
   .wave{ display:block; width:100%; height:70px; }
@@ -484,6 +602,12 @@
     .foot-grid{ grid-template-columns:1fr; gap:32px; margin-bottom:40px; }
     footer .foot-desc{ max-width:100%; }
     .foot-bottom{ flex-direction:column; align-items:flex-start; gap:8px; }
+
+    .header-right{ gap:10px; }
+    .cart-drawer{ width:100vw; }
+    .cart-drawer-head{ padding:20px; }
+    .cart-drawer-body{ padding:10px 20px; }
+    .cart-drawer-foot{ padding:18px 20px 22px; }
   }
 
   @media (max-width:400px){
@@ -504,6 +628,10 @@
   </nav>
   <div class="header-right">
     <a href="#shop" class="nav-cta">Shop Now</a>
+    <button type="button" class="cart-btn" id="cartBtn" aria-label="Open cart" aria-expanded="false">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
     <button class="burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false"><span></span></button>
   </div>
 </header>
@@ -516,14 +644,88 @@
   <a href="#shop" class="nav-cta">Shop Now</a>
 </nav>
 
+<button type="button" class="cart-overlay" id="cartOverlay" aria-hidden="true" tabindex="-1"></button>
+<aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
+  <div class="cart-drawer-head">
+    <h3 id="cartDrawerTitle">Your bag</h3>
+    <button type="button" class="cart-close" id="cartCloseBtn" aria-label="Close cart">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="cart-drawer-body">
+    <div class="cart-view" id="cartView">
+      <div class="cart-empty" id="cartEmpty">
+        <p>Your bag is empty.</p>
+        <span>Add a step from the ritual to get started.</span>
+      </div>
+    </div>
+
+    <div class="checkout-view" id="checkoutView" hidden>
+      <p class="checkout-note">Cash on delivery — no card needed. We'll call to confirm before your order ships.</p>
+      <div class="field">
+        <label for="coName">Full name</label>
+        <input type="text" id="coName" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="coPhone">Phone number</label>
+        <input type="tel" id="coPhone" autocomplete="tel">
+      </div>
+      <div class="field">
+        <label for="coAddress">Delivery address</label>
+        <textarea id="coAddress" autocomplete="street-address"></textarea>
+      </div>
+      <div class="field">
+        <label for="coCity">City</label>
+        <input type="text" id="coCity" autocomplete="address-level2">
+      </div>
+      <div class="field">
+        <label for="coNotes">Order notes (optional)</label>
+        <textarea id="coNotes" placeholder="e.g. preferred delivery time"></textarea>
+      </div>
+      <div class="checkout-summary" id="checkoutSummary"></div>
+    </div>
+
+    <div class="success-view" id="successView" hidden>
+      <div class="success-icon">✓</div>
+      <h4>Order placed</h4>
+      <p>Order <strong id="successOrderId"></strong> is confirmed. We'll call <strong id="successPhone"></strong> to confirm delivery — pay by cash when it arrives.</p>
+      <p class="success-warning" id="successWarning" hidden>This order wasn't emailed yet — the site owner needs to add a Web3Forms key to receive orders automatically.</p>
+    </div>
+  </div>
+
+  <div class="cart-drawer-foot">
+    <div class="foot-step" id="footCart">
+      <div class="cart-subtotal-row">
+        <span>Subtotal</span>
+        <span id="cartSubtotal">$0</span>
+      </div>
+      <button class="btn-primary cart-checkout" id="cartCheckoutBtn" type="button" disabled>
+        Proceed to checkout
+      </button>
+      <p class="cart-note">Cash on delivery only — pay when your order arrives.</p>
+    </div>
+
+    <div class="foot-step" id="footCheckout" hidden>
+      <button class="link-back" id="backToCartBtn" type="button">&larr; Back to bag</button>
+      <button class="btn-primary cart-checkout" id="placeOrderBtn" type="button">Place COD order</button>
+      <p class="cart-note cart-error" id="checkoutError" hidden></p>
+    </div>
+
+    <div class="foot-step" id="footSuccess" hidden>
+      <button class="btn-primary cart-checkout" id="continueShoppingBtn" type="button">Continue shopping</button>
+    </div>
+  </div>
+</aside>
+
 <section class="hero" id="top">
   <div class="hero-copy">
-    <div class="eyebrow">Slow-formulated skincare</div>
+    <div class="eyebrow" id="heroEyebrow">Slow-formulated skincare</div>
     <h1>
-      <span><b>Skin,</b></span>
-      <span><b>unhurried.</b></span>
+      <span><b id="heroLine1">Skin,</b></span>
+      <span><b id="heroLine2">unhurried.</b></span>
     </h1>
-    <p class="lede">Four formulas, built on marine minerals and patience. Nothing rushed, nothing wasted — just what your skin was already asking for.</p>
+    <p class="lede" id="heroLede">Four formulas, built on marine minerals and patience. Nothing rushed, nothing wasted — just what your skin was already asking for.</p>
     <div class="hero-actions">
       <a href="#shop" class="btn-primary">Shop the ritual
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -581,10 +783,10 @@
       <div class="product-card p1">
         <div class="p-index">N&deg;01 — CLEANSE</div>
         <div class="p-visual"><div class="jar"></div></div>
-        <h3>Tidal Cleanser</h3>
-        <p class="p-desc">A cream-to-foam wash with kelp amino acids. Lifts the day without stripping the barrier.</p>
+        <h3 id="p1Name">Tidal Cleanser</h3>
+        <p class="p-desc" id="p1Desc">A cream-to-foam wash with kelp amino acids. Lifts the day without stripping the barrier.</p>
         <div class="p-foot">
-          <span class="p-price">$34</span>
+          <span class="p-price" id="p1Price">$34</span>
           <button class="p-add" aria-label="Add Tidal Cleanser to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -593,10 +795,10 @@
       <div class="product-card p2">
         <div class="p-index">N&deg;02 — TREAT</div>
         <div class="p-visual"><div class="jar"></div></div>
-        <h3>Hydra Serum</h3>
-        <p class="p-desc">Five-molecular-weight hyaluronic acid plus niacinamide. The one step that carries the rest.</p>
+        <h3 id="p2Name">Hydra Serum</h3>
+        <p class="p-desc" id="p2Desc">Five-molecular-weight hyaluronic acid plus niacinamide. The one step that carries the rest.</p>
         <div class="p-foot">
-          <span class="p-price">$58</span>
+          <span class="p-price" id="p2Price">$58</span>
           <button class="p-add" aria-label="Add Hydra Serum to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -605,10 +807,10 @@
       <div class="product-card p3">
         <div class="p-index">N&deg;03 — SEAL</div>
         <div class="p-visual"><div class="jar"></div></div>
-        <h3>Depth Cream</h3>
-        <p class="p-desc">A barrier cream built on ceramides and squalane. Rich without ever feeling heavy.</p>
+        <h3 id="p3Name">Depth Cream</h3>
+        <p class="p-desc" id="p3Desc">A barrier cream built on ceramides and squalane. Rich without ever feeling heavy.</p>
         <div class="p-foot">
-          <span class="p-price">$62</span>
+          <span class="p-price" id="p3Price">$62</span>
           <button class="p-add" aria-label="Add Depth Cream to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -617,10 +819,10 @@
       <div class="product-card p4">
         <div class="p-index">N&deg;04 — DEFEND</div>
         <div class="p-visual"><div class="jar"></div></div>
-        <h3>Horizon SPF 40</h3>
-        <p class="p-desc">A mineral finish with zero white cast. The last, non-negotiable step, every morning.</p>
+        <h3 id="p4Name">Horizon SPF 40</h3>
+        <p class="p-desc" id="p4Desc">A mineral finish with zero white cast. The last, non-negotiable step, every morning.</p>
         <div class="p-foot">
-          <span class="p-price">$40</span>
+          <span class="p-price" id="p4Price">$40</span>
           <button class="p-add" aria-label="Add Horizon SPF to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -641,20 +843,20 @@
     <div class="ritual-grid reveal-stagger">
       <div class="ritual-step">
         <div class="rn">01 / MORNING</div>
-        <h3>Wake the skin</h3>
-        <p>Tidal Cleanser, then Hydra Serum, sealed with Horizon SPF before you leave the house.</p>
+        <h3 id="r1Title">Wake the skin</h3>
+        <p id="r1Desc">Tidal Cleanser, then Hydra Serum, sealed with Horizon SPF before you leave the house.</p>
         <span class="time">2 MIN</span>
       </div>
       <div class="ritual-step">
         <div class="rn">02 / EVENING</div>
-        <h3>Let it repair</h3>
-        <p>Cleanse away the day, layer the serum, and finish with Depth Cream while skin is still damp.</p>
+        <h3 id="r2Title">Let it repair</h3>
+        <p id="r2Desc">Cleanse away the day, layer the serum, and finish with Depth Cream while skin is still damp.</p>
         <span class="time">3 MIN</span>
       </div>
       <div class="ritual-step">
         <div class="rn">03 / WEEKLY</div>
-        <h3>Go deeper</h3>
-        <p>Double-cleanse on Sundays. Let the serum sit five minutes longer than usual. No rush.</p>
+        <h3 id="r3Title">Go deeper</h3>
+        <p id="r3Desc">Double-cleanse on Sundays. Let the serum sit five minutes longer than usual. No rush.</p>
         <span class="time">10 MIN</span>
       </div>
     </div>
@@ -779,7 +981,7 @@
     <div class="foot-grid">
       <div>
         <div class="logo">nova<em> skin</em></div>
-        <p class="foot-desc">Slow-formulated skincare, built on marine minerals. Four steps, no more.</p>
+        <p class="foot-desc" id="footerDesc">Slow-formulated skincare, built on marine minerals. Four steps, no more.</p>
       </div>
       <div>
         <h5>Shop</h5>
@@ -810,11 +1012,25 @@
     <div class="foot-bottom">
       <span>© 2026 Nova Skin Co.</span>
       <span>Made slowly, on the coast.</span>
+      <a href="admin.html" style="text-decoration:underline;">Admin</a>
     </div>
   </div>
 </footer>
 
 <script>
+  // ---------------- load content saved from the separate admin dashboard ----------------
+  (function applySavedContent(){
+    let data;
+    try{ data = JSON.parse(localStorage.getItem('novaSkinContent') || '{}'); }
+    catch(e){ data = {}; }
+    Object.keys(data).forEach(id => {
+      const el = document.getElementById(id);
+      if(el && typeof data[id] === 'string' && data[id].trim() !== ''){
+        el.textContent = data[id];
+      }
+    });
+  })();
+
   // header scroll state
   const header = document.getElementById('siteHeader');
   window.addEventListener('scroll', () => {
@@ -895,6 +1111,218 @@
   applyDemo.addEventListener('click', () => {
     refInput.value = 'NOVA-JOY21';
     revealBonus();
+  });
+
+  // ---------------- CART + COD CHECKOUT ----------------
+  // To receive orders by email automatically, get a free access key at
+  // https://web3forms.com and paste it below. Until then, orders still
+  // complete on-screen but aren't emailed anywhere.
+  const WEB3FORMS_ACCESS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY';
+  const WEB3FORMS_CONFIGURED = WEB3FORMS_ACCESS_KEY !== 'YOUR_WEB3FORMS_ACCESS_KEY';
+
+  const cartBtn = document.getElementById('cartBtn');
+  const cartOverlay = document.getElementById('cartOverlay');
+  const cartDrawer = document.getElementById('cartDrawer');
+  const cartCloseBtn = document.getElementById('cartCloseBtn');
+  const cartCountEl = document.getElementById('cartCount');
+  const cartDrawerTitle = document.getElementById('cartDrawerTitle');
+
+  const cartView = document.getElementById('cartView');
+  const checkoutView = document.getElementById('checkoutView');
+  const successView = document.getElementById('successView');
+  const cartEmptyEl = document.getElementById('cartEmpty');
+  const cartSubtotalEl = document.getElementById('cartSubtotal');
+  const checkoutSummaryEl = document.getElementById('checkoutSummary');
+
+  const footCart = document.getElementById('footCart');
+  const footCheckout = document.getElementById('footCheckout');
+  const footSuccess = document.getElementById('footSuccess');
+  const cartCheckoutBtn = document.getElementById('cartCheckoutBtn');
+  const backToCartBtn = document.getElementById('backToCartBtn');
+  const placeOrderBtn = document.getElementById('placeOrderBtn');
+  const continueShoppingBtn = document.getElementById('continueShoppingBtn');
+  const checkoutErrorEl = document.getElementById('checkoutError');
+  const successOrderIdEl = document.getElementById('successOrderId');
+  const successPhoneEl = document.getElementById('successPhone');
+  const successWarningEl = document.getElementById('successWarning');
+
+  const coName = document.getElementById('coName');
+  const coPhone = document.getElementById('coPhone');
+  const coAddress = document.getElementById('coAddress');
+  const coCity = document.getElementById('coCity');
+  const coNotes = document.getElementById('coNotes');
+
+  let cart = []; // { id, name, price, qty }
+
+  function openCart(){
+    cartDrawer.classList.add('open'); cartOverlay.classList.add('open');
+    cartDrawer.setAttribute('aria-hidden','false'); cartBtn.setAttribute('aria-expanded','true');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeCart(){
+    cartDrawer.classList.remove('open'); cartOverlay.classList.remove('open');
+    cartDrawer.setAttribute('aria-hidden','true'); cartBtn.setAttribute('aria-expanded','false');
+    document.body.style.overflow = '';
+  }
+  cartBtn.addEventListener('click', openCart);
+  cartCloseBtn.addEventListener('click', closeCart);
+  cartOverlay.addEventListener('click', closeCart);
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeCart(); });
+
+  function showStep(step){
+    cartView.hidden = step !== 'cart';
+    checkoutView.hidden = step !== 'checkout';
+    successView.hidden = step !== 'success';
+    footCart.hidden = step !== 'cart';
+    footCheckout.hidden = step !== 'checkout';
+    footSuccess.hidden = step !== 'success';
+    cartDrawerTitle.textContent = step === 'checkout' ? 'Delivery details' : step === 'success' ? 'Order placed' : 'Your bag';
+  }
+
+  function renderCart(){
+    cartView.querySelectorAll('.cart-item').forEach(el => el.remove());
+    const totalQty = cart.reduce((sum,i) => sum + i.qty, 0);
+    cartCountEl.textContent = totalQty;
+    cartCountEl.classList.toggle('show', totalQty > 0);
+    cartCheckoutBtn.disabled = cart.length === 0;
+
+    if(cart.length === 0){
+      cartEmptyEl.style.display = 'flex';
+    } else {
+      cartEmptyEl.style.display = 'none';
+      cart.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'cart-item';
+        row.innerHTML = `
+          <div class="cart-item-swatch"></div>
+          <div class="cart-item-info">
+            <div class="ci-name">${item.name}</div>
+            <div class="ci-price">$${item.price}</div>
+          </div>
+          <div class="cart-item-qty">
+            <button type="button" data-action="dec" aria-label="Decrease quantity">−</button>
+            <span>${item.qty}</span>
+            <button type="button" data-action="inc" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="cart-item-remove" data-action="remove">Remove</button>
+        `;
+        row.querySelector('[data-action="inc"]').addEventListener('click', () => { item.qty++; renderCart(); });
+        row.querySelector('[data-action="dec"]').addEventListener('click', () => {
+          item.qty--;
+          if(item.qty <= 0) cart = cart.filter(i => i.id !== item.id);
+          renderCart();
+        });
+        row.querySelector('[data-action="remove"]').addEventListener('click', () => {
+          cart = cart.filter(i => i.id !== item.id);
+          renderCart();
+        });
+        cartView.appendChild(row);
+      });
+    }
+
+    const subtotal = cart.reduce((sum,i) => sum + i.qty * i.price, 0);
+    cartSubtotalEl.textContent = '$' + subtotal.toLocaleString();
+  }
+
+  function addToCart(id, name, price){
+    const existing = cart.find(i => i.id === id);
+    if(existing){ existing.qty++; } else { cart.push({ id, name, price, qty:1 }); }
+    renderCart();
+    openCart();
+    showStep('cart');
+  }
+
+  document.querySelectorAll('.product-card').forEach(card => {
+    const addBtn = card.querySelector('.p-add');
+    if(!addBtn) return;
+    const name = card.querySelector('h3')?.textContent.trim() || 'Product';
+    const priceText = card.querySelector('.p-price')?.textContent.trim() || '$0';
+    const price = parseFloat(priceText.replace(/[^0-9.]/g,'')) || 0;
+    addBtn.addEventListener('click', () => addToCart(name, name, price));
+  });
+
+  renderCart();
+
+  // --- checkout step ---
+  function buildSummary(){
+    const subtotal = cart.reduce((sum,i) => sum + i.qty * i.price, 0);
+    const rows = cart.map(i => `
+      <div class="cs-row"><span>${i.name} × ${i.qty}</span><span>$${(i.qty * i.price).toLocaleString()}</span></div>
+    `).join('');
+    checkoutSummaryEl.innerHTML = rows + `<div class="cs-row cs-total"><span>Total (COD)</span><span>$${subtotal.toLocaleString()}</span></div>`;
+    return subtotal;
+  }
+
+  cartCheckoutBtn.addEventListener('click', () => {
+    if(cart.length === 0) return;
+    buildSummary();
+    checkoutErrorEl.hidden = true;
+    showStep('checkout');
+  });
+  backToCartBtn.addEventListener('click', () => showStep('cart'));
+
+  placeOrderBtn.addEventListener('click', async () => {
+    const name = coName.value.trim();
+    const phone = coPhone.value.trim();
+    const address = coAddress.value.trim();
+    const city = coCity.value.trim();
+
+    if(!name || !phone || !address || !city){
+      checkoutErrorEl.textContent = 'Please fill in your name, phone, address and city.';
+      checkoutErrorEl.hidden = false;
+      return;
+    }
+    checkoutErrorEl.hidden = true;
+
+    const subtotal = cart.reduce((sum,i) => sum + i.qty * i.price, 0);
+    const orderId = 'NS-' + Date.now().toString().slice(-6);
+    const summaryText = cart.map(i => `${i.name} x${i.qty} — $${i.qty * i.price}`).join('\n');
+
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.textContent = 'Placing order…';
+
+    let emailed = false;
+    if(WEB3FORMS_CONFIGURED){
+      try{
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', Accept:'application/json' },
+          body: JSON.stringify({
+            access_key: WEB3FORMS_ACCESS_KEY,
+            subject: `New COD order ${orderId} — Nova Skin`,
+            from_name: name,
+            order_id: orderId,
+            customer_phone: phone,
+            customer_address: address,
+            customer_city: city,
+            notes: coNotes.value.trim() || '—',
+            order_summary: summaryText,
+            order_total: '$' + subtotal.toLocaleString(),
+            payment_method: 'Cash on delivery',
+          })
+        });
+        emailed = res.ok;
+      } catch(e){
+        emailed = false;
+      }
+    }
+
+    placeOrderBtn.disabled = false;
+    placeOrderBtn.textContent = 'Place COD order';
+
+    successOrderIdEl.textContent = orderId;
+    successPhoneEl.textContent = phone;
+    successWarningEl.hidden = emailed;
+    showStep('success');
+
+    cart = [];
+    renderCart();
+    coName.value = ''; coPhone.value = ''; coAddress.value = ''; coCity.value = ''; coNotes.value = '';
+  });
+
+  continueShoppingBtn.addEventListener('click', () => {
+    showStep('cart');
+    closeCart();
   });
 
   // copy referral link
