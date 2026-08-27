@@ -75,8 +75,28 @@
   }
 
   /* ---------------- NAV ---------------- */
+  /* ---------------- ANNOUNCEMENT BAR ---------------- */
+  .announce-bar{
+    position:fixed; top:0; left:0; right:0; z-index:101;
+    height:38px; overflow:hidden;
+    background:var(--navy); color:var(--beige);
+  }
+  .announce-track{
+    display:flex; align-items:center; height:100%;
+    width:max-content;
+    animation:marquee 22s linear infinite;
+  }
+  .announce-track span{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em;
+    padding:0 28px; white-space:nowrap; flex-shrink:0;
+  }
+  @keyframes marquee{
+    from{ transform:translateX(0); }
+    to{ transform:translateX(-50%); }
+  }
+
   header{
-    position:fixed; top:0; left:0; right:0; z-index:100;
+    position:fixed; top:38px; left:0; right:0; z-index:100;
     padding:22px 40px;
     display:flex; align-items:center; justify-content:space-between;
     background:rgba(245,239,235,.72);
@@ -239,6 +259,83 @@
   .success-view p{ font-size:13px; color:var(--navy-70); line-height:1.55; }
   .success-warning{ color:#b3443a !important; }
 
+  /* ---------------- PRODUCT DETAIL MODAL ---------------- */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:210; background:rgba(77,14,19,.4); border:none; padding:0; cursor:default;
+    opacity:0; visibility:hidden; transition:opacity .35s var(--ease), visibility 0s linear .35s;
+  }
+  .modal-overlay.open{ opacity:1; visibility:visible; transition:opacity .35s var(--ease); }
+
+  .product-modal{
+    position:fixed; z-index:211; left:50%; top:50%;
+    width:min(560px, calc(100vw - 40px)); max-height:min(720px, calc(100vh - 60px));
+    background:var(--white); border-radius:24px; box-shadow:0 60px 100px -30px rgba(77,14,19,.4);
+    display:flex; flex-direction:column;
+    opacity:0; visibility:hidden;
+    transform:translate(-50%,-50%) scale(.94);
+    transition:opacity .35s var(--ease), transform .35s var(--ease), visibility 0s linear .35s;
+  }
+  .product-modal.open{
+    opacity:1; visibility:visible; transform:translate(-50%,-50%) scale(1);
+    transition:opacity .35s var(--ease), transform .35s var(--ease);
+  }
+  .modal-close{
+    position:absolute; top:18px; right:18px; z-index:2;
+    width:36px; height:36px; border-radius:50%; border:1px solid var(--navy-40); background:var(--white);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--navy);
+    transition:border-color .3s var(--ease), transform .3s var(--ease);
+  }
+  .modal-close:hover{ border-color:var(--navy); transform:rotate(90deg); }
+  .modal-scroll{ overflow-y:auto; padding:44px 34px 12px; }
+  .modal-index{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--teal); margin-bottom:10px;
+  }
+  .modal-name{ font-family:var(--font-main); font-weight:700; font-size:24px; margin-bottom:14px; }
+  .modal-desc{ font-size:14px; color:var(--navy-70); line-height:1.65; margin-bottom:26px; }
+  .modal-section{ margin-bottom:26px; }
+  .modal-section h4{
+    font-family:var(--font-main); font-weight:700; font-size:13px; letter-spacing:.02em;
+    text-transform:uppercase; margin-bottom:14px; color:var(--navy);
+  }
+  .modal-ingredients{ list-style:none; }
+  .modal-ingredients li{
+    font-size:13.5px; color:var(--navy-70); line-height:1.5; padding:11px 0; border-top:1px solid rgba(77,14,19,.1);
+  }
+  .modal-ingredients li:first-child{ border-top:none; }
+  .modal-ingredients li b{ color:var(--navy); font-weight:700; }
+  .modal-steps{ list-style:none; counter-reset:step; }
+  .modal-steps li{
+    font-size:13.5px; color:var(--navy-70); line-height:1.5; padding:9px 0 9px 30px; position:relative;
+    counter-increment:step;
+  }
+  .modal-steps li::before{
+    content:counter(step); position:absolute; left:0; top:8px;
+    width:20px; height:20px; border-radius:50%; background:var(--teal-soft); color:var(--navy);
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .modal-precautions{ list-style:none; }
+  .modal-precautions li{
+    font-size:12.5px; color:var(--navy-40); line-height:1.55; padding:6px 0 6px 16px; position:relative;
+  }
+  .modal-precautions li::before{ content:'—'; position:absolute; left:0; color:var(--navy-40); }
+  .modal-foot{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding:20px 34px; border-top:1px solid rgba(77,14,19,.1); flex-shrink:0;
+  }
+  .modal-price{ font-family:'IBM Plex Mono',monospace; font-size:17px; font-weight:700; color:var(--navy); }
+  .modal-foot .btn-primary{ flex-shrink:0; }
+  .product-card{ cursor:pointer; }
+  .product-card .p-add{ cursor:pointer; }
+
+  @media (max-width:640px){
+    .product-modal{ width:calc(100vw - 24px); max-height:calc(100vh - 40px); border-radius:20px; }
+    .modal-scroll{ padding:38px 22px 8px; }
+    .modal-foot{ padding:16px 22px; }
+    .modal-name{ font-size:21px; }
+  }
+
   .burger{
     display:none; width:38px; height:38px; border-radius:50%; border:1px solid var(--navy-40);
     background:none; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
@@ -258,7 +355,7 @@
     display:none;
     position:fixed; top:0; left:0; right:0; bottom:0; z-index:99;
     background:var(--beige);
-    padding:110px 32px 40px;
+    padding:148px 32px 40px;
     flex-direction:column; gap:6px;
     opacity:0; visibility:hidden; transform:translateY(-8px);
     transition:opacity .35s var(--ease), transform .35s var(--ease), visibility 0s linear .35s;
@@ -277,7 +374,7 @@
     display:grid;
     grid-template-columns:1.1fr .9fr;
     align-items:center;
-    padding:140px 40px 80px;
+    padding:178px 40px 80px;
     max-width:1240px; margin:0 auto;
     gap:40px;
   }
@@ -540,7 +637,7 @@
     .mobile-nav{ display:flex; }
     .wrap{ padding:0 24px; }
     .wrap-bleed{ padding:0 24px; }
-    .hero{ grid-template-columns:1fr; padding:118px 24px 56px; text-align:left; gap:56px; }
+    .hero{ grid-template-columns:1fr; padding:156px 24px 56px; text-align:left; gap:56px; }
     .hero-visual{ height:360px; order:-1; }
     .products-grid{ grid-template-columns:repeat(2,1fr); }
     .offers-grid{ grid-template-columns:1fr; gap:18px; }
@@ -558,12 +655,12 @@
     header{ padding:16px 20px; }
     .logo{ font-size:18px; }
     .header-right .nav-cta{ display:none; }
-    .mobile-nav{ padding:96px 26px 40px; }
+    .mobile-nav{ padding:134px 26px 40px; }
     .mobile-nav a{ font-size:26px; padding:14px 0; }
     .wrap{ padding:0 20px; }
     .wrap-bleed{ padding:0 20px; }
 
-    .hero{ padding:100px 20px 48px; gap:40px; min-height:auto; }
+    .hero{ padding:138px 20px 48px; gap:40px; min-height:auto; }
     .hero-copy h1{ font-size:clamp(38px,11vw,54px); margin-bottom:20px; }
     .hero-copy p.lede{ font-size:15.5px; max-width:100%; margin-bottom:30px; }
     .hero-actions{ flex-wrap:wrap; gap:14px; }
@@ -631,6 +728,19 @@
     <button class="burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false"><span></span></button>
   </div>
 </header>
+
+<div class="announce-bar" aria-hidden="true">
+  <div class="announce-track">
+    <span>FREE DELIVERY ON ORDERS ABOVE RS 3,000</span>
+    <span>FREE DELIVERY ON ORDERS ABOVE RS 3,000</span>
+    <span>FREE DELIVERY ON ORDERS ABOVE RS 3,000</span>
+    <span>FREE DELIVERY ON ORDERS ABOVE RS 3,000</span>
+    <span>FREE DELIVERY ON ORDERS ABOVE RS 3,000</span>
+    <span>FREE DELIVERY ON ORDERS ABOVE RS 3,000</span>
+    <span>FREE DELIVERY ON ORDERS ABOVE RS 3,000</span>
+    <span>FREE DELIVERY ON ORDERS ABOVE RS 3,000</span>
+  </div>
+</div>
 
 <nav class="mobile-nav" id="mobileNav">
   <a href="#ritual">Ritual</a>
@@ -740,6 +850,37 @@
   </div>
 </aside>
 
+<button type="button" class="modal-overlay" id="productModalOverlay" aria-hidden="true" tabindex="-1"></button>
+<div class="product-modal" id="productModal" aria-hidden="true" role="dialog" aria-label="Product details">
+  <button type="button" class="modal-close" id="productModalClose" aria-label="Close details">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <div class="modal-scroll">
+    <div class="modal-index" id="modalIndex"></div>
+    <h3 class="modal-name" id="modalName"></h3>
+    <p class="modal-desc" id="modalDesc"></p>
+
+    <div class="modal-section">
+      <h4>Key Ingredients &amp; Benefits</h4>
+      <ul class="modal-ingredients" id="modalIngredients"></ul>
+    </div>
+
+    <div class="modal-section">
+      <h4>How to Use</h4>
+      <ol class="modal-steps" id="modalHowToUse"></ol>
+    </div>
+
+    <div class="modal-section">
+      <h4>Precautions</h4>
+      <ul class="modal-precautions" id="modalPrecautions"></ul>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <span class="modal-price" id="modalPrice"></span>
+    <button type="button" class="btn-primary" id="modalAddBtn">Add to bag</button>
+  </div>
+</div>
+
 <section class="hero" id="top">
   <div class="hero-copy">
     <div class="eyebrow" id="heroEyebrow">Slow-formulated skincare</div>
@@ -827,7 +968,7 @@
       </div>
       <div class="product-card p3">
         <div class="p-index">N&deg;03 — SEAL</div>
-        <div class="p-visual"><div class="jar"></div></div>
+        <div class="p-visual"></div>
         <h3 id="p3Name">Depth Cream</h3>
         <p class="p-desc" id="p3Desc">A barrier cream built on ceramides and squalane. Rich without ever feeling heavy.</p>
         <div class="p-foot">
@@ -839,7 +980,7 @@
       </div>
       <div class="product-card p4">
         <div class="p-index">N&deg;04 — DEFEND</div>
-        <div class="p-visual"><div class="jar"></div></div>
+        <div class="p-visual"></div>
         <h3 id="p4Name">Horizon SPF 40</h3>
         <p class="p-desc" id="p4Desc">A mineral finish with zero white cast. The last, non-negotiable step, every morning.</p>
         <div class="p-foot">
@@ -1306,19 +1447,221 @@
     showStep('cart');
   }
 
+  // ---------------- PRODUCT DETAIL MODAL ----------------
+  const productData = {
+    p1: {
+      desc: "Nova Skin Brightening Face Wash is an advanced hydrating cleanser designed to target dark spots, melasma, and hyperpigmentation. Infused with Glutathione, Kojic Acid, Niacinamide, and Licorice Extract, it deeply cleanses impurities, hydrates the skin, and promotes an even, radiant complexion.",
+      ingredients: [
+        ["Glutathione", "Powerful antioxidant that brightens skin tone and reduces pigmentation."],
+        ["Kojic Acid", "Effectively fades dark spots, sun spots, and melasma marks."],
+        ["Niacinamide", "Improves skin texture, reduces dark spots, and enhances overall glow."],
+        ["Licorice Extract", "Brightens complexions and visibly evens out skin tone."],
+        ["Aloe Vera Extract", "Provides deep hydration, extra moisture, and calms the skin."]
+      ],
+      howToUse: [
+        "Wet face with lukewarm water and apply a small amount of face wash.",
+        "Gently massage onto the skin, carefully avoiding the eye area.",
+        "Rinse thoroughly and pat dry. Use twice daily for optimal results."
+      ],
+      precautions: [
+        "For external use only. Avoid direct contact with eyes.",
+        "If irritation occurs, reduce frequency of use or discontinue.",
+        "Keep out of reach of children and store below 25°C."
+      ]
+    },
+    p2: {
+      desc: "Nova Skin Anti-Acne Serum is a lightweight formula that fights active acne, fades dark scars, and controls oil. Enriched with Salicylic Acid, Azelaic Acid, and Niacinamide, it unclogs pores, reduces redness, and provides deep hydration for smooth, clear skin.",
+      ingredients: [
+        ["Azelaic Acid", "Fades acne marks and calms skin redness."],
+        ["Salicylic Acid", "Unclogs pores, removes dead skin, and controls blackheads."],
+        ["Niacinamide", "Regulates oil production and tightens enlarged pores."],
+        ["Sodium Hyaluronate", "Plumps skin and provides deep hydration."],
+        ["Glycerin", "Locks in moisture to prevent dryness."]
+      ],
+      howToUse: [
+        "Apply 2–3 drops on a clean face and gently massage until absorbed.",
+        "Follow with a moisturizer. Use once or twice daily."
+      ],
+      precautions: [
+        "For external use only. Perform a patch test before use.",
+        "Store in a cool, dry place away from children. Discontinue if irritation occurs."
+      ]
+    },
+    p3: {
+      desc: "Full ingredient details for Depth Cream are coming soon.",
+      ingredients: [],
+      howToUse: [],
+      precautions: []
+    },
+    p4: {
+      desc: "Full ingredient details for Horizon SPF 40 are coming soon.",
+      ingredients: [],
+      howToUse: [],
+      precautions: []
+    },
+    p5: {
+      desc: "Nova Skin Vitamin-C Whitening Serum is a powerful glow-boosting formula designed to brighten dull skin, even out skin tone, and reduce fine lines and wrinkles. Enriched with Vitamin C, Alpha Arbutin, L-Glutathione, and Hyaluronic Acid, it deeply hydrates skin cells and fades dark spots for a radiant, youthful complexion.",
+      ingredients: [
+        ["Vitamin C (3-O-Ethyl Ascorbic Acid)", "Boosts skin radiance, protects against sun damage, and helps fade pigmentation."],
+        ["Alpha Arbutin", "Brightens skin tone, reduces hyperpigmentation, and targets dark spots."],
+        ["L-Glutathione", "Powerful antioxidant that promotes skin whitening and enhances skin glow."],
+        ["Hyaluronic Acid", "Deeply hydrates skin cells and reduces the appearance and depth of wrinkles."],
+        ["Licorice Extract & Niacinamide", "Soothes skin, balances skin tone, and restores natural radiance."]
+      ],
+      howToUse: [
+        "Apply 2–3 drops onto a clean face and gently massage until fully absorbed.",
+        "Follow with a moisturizer and apply SPF sunscreen during the day. Use once or twice daily."
+      ],
+      precautions: [
+        "For external use only. Perform a patch test before initial use.",
+        "Wear sunscreen during daytime use.",
+        "Store in a cool, dry place away from direct light. Discontinue use if irritation occurs."
+      ]
+    },
+    p6: {
+      desc: "Nova Skin Acne Removal Face Wash is a gentle yet powerful cleanser formulated for acne-prone and oily skin. Powered by Salicylic Acid, Niacinamide, and Licorice Extract, it clears existing breakouts, prevents future pimples, and unclogs pores without drying out the skin.",
+      ingredients: [
+        ["Salicylic Acid", "Unclogs pores, removes dead skin cells, and prevents blackheads and breakouts."],
+        ["Niacinamide", "Controls excess oil, reduces acne spots, and smoothes skin texture."],
+        ["Licorice Extract", "Brightens skin tone and helps fade post-acne marks."],
+        ["Azelaic Acid", "Fades scars and calms skin inflammation and redness."],
+        ["Aloe Vera Extract", "Soothes, hydrates."]
+      ],
+      howToUse: [
+        "Wet face with lukewarm water and apply a small amount of face wash.",
+        "Gently massage onto the skin, carefully avoiding the eye area.",
+        "Rinse thoroughly and pat dry. Use twice daily for best results."
+      ],
+      precautions: [
+        "For external use only. Avoid direct contact with eyes.",
+        "If irritation occurs, reduce frequency of use or discontinue.",
+        "Keep out of reach of children and store below 25°C."
+      ]
+    },
+    p7: {
+      desc: "Nova Skin Sun Block SPF-60 provides high-performance, broad-spectrum UVA and UVB protection to shield skin from sun damage. Formulated with Zinc Oxide, Micronized Titanium Dioxide, and Aloe Vera Extract, it protects against sunburn, helps prevent sun-induced pigmentation, and reduces the risk of premature aging to keep skin healthy.",
+      ingredients: [
+        ["Zinc Oxide & Titanium Dioxide", "Provide physical broad-spectrum protection against harmful UVA/UVB rays and sunburn."],
+        ["Aloe Vera Extract", "Soothes, cools, and hydrates sun-exposed skin."],
+        ["Sodium Hyaluronate", "Restores skin hydration and keeps the skin smooth."],
+        ["Glycerin", "Retains essential moisture, preventing skin dry-out under the sun."]
+      ],
+      howToUse: [
+        "Apply sunblock generously to all exposed skin 15 minutes before going outside.",
+        "Rub thoroughly until fully absorbed.",
+        "Reapply every 2 hours, or after showering and heavy sweating, for continuous daily protection."
+      ],
+      precautions: [
+        "For external use only. Avoid contact with eyes; if contact occurs, rinse thoroughly with water.",
+        "If irritation occurs, reduce frequency of use or discontinue.",
+        "Keep out of reach of children and store below 25°C."
+      ]
+    },
+    p8: {
+      desc: "Nova Skin Whitening Cream is an advanced brightening cream featuring a unique combination of Kojic Acid, Vitamin C, and Glutathione. Rich in antioxidants and anti-aging properties, it fades dark spots, smooths skin texture, and evens out overall skin tone for a radiant, youthful complexion.",
+      ingredients: [
+        ["Kojic Acid", "Fades stubborn dark spots, hyperpigmentation, and sun spots."],
+        ["Vitamin C", "Boosts skin glow, provides antioxidant defense, and brightens complexion."],
+        ["Glutathione", "Promotes skin whitening and targets uneven skin tone."],
+        ["Alpha Arbutin & Licorice Extract", "Visibly diminish pigmentation and restore natural skin luminosity."],
+        ["Niacinamide & Sodium Hyaluronate", "Smooth skin texture, strengthen skin barrier, and deliver deep hydration."]
+      ],
+      howToUse: [
+        "Apply a small amount to clean, dry skin.",
+        "Gently massage until fully absorbed.",
+        "Use once or twice daily (morning and night), avoiding the eye area. Use consistently for best results."
+      ],
+      precautions: [
+        "For external use only. Avoid contact with eyes; if contact occurs, rinse thoroughly with water.",
+        "If irritation occurs, reduce frequency of use or discontinue.",
+        "Keep out of reach of children and store below 25°C."
+      ]
+    }
+  };
+
+  const productModal = document.getElementById('productModal');
+  const productModalOverlay = document.getElementById('productModalOverlay');
+  const productModalClose = document.getElementById('productModalClose');
+  const modalIndex = document.getElementById('modalIndex');
+  const modalName = document.getElementById('modalName');
+  const modalDesc = document.getElementById('modalDesc');
+  const modalIngredients = document.getElementById('modalIngredients');
+  const modalHowToUse = document.getElementById('modalHowToUse');
+  const modalPrecautions = document.getElementById('modalPrecautions');
+  const modalPrice = document.getElementById('modalPrice');
+  const modalAddBtn = document.getElementById('modalAddBtn');
+
+  let activeModalProduct = null;
+
+  function openProductModal(card){
+    const key = [...card.classList].find(c => /^p[0-9]+$/.test(c));
+    const data = productData[key];
+    if(!data) return;
+
+    const name = card.querySelector('h3')?.textContent.trim() || 'Product';
+    const indexLabel = card.querySelector('.p-index')?.textContent.trim() || '';
+    const priceText = card.querySelector('.p-price')?.textContent.trim() || 'Rs 0';
+    const price = parseFloat(priceText.replace(/[^0-9.]/g,'')) || 0;
+
+    activeModalProduct = { name, price };
+
+    modalIndex.textContent = indexLabel;
+    modalName.textContent = name;
+    modalDesc.textContent = data.desc;
+    modalPrice.textContent = priceText;
+
+    modalIngredients.innerHTML = data.ingredients.length
+      ? data.ingredients.map(([n,b]) => `<li><b>${n}:</b> ${b}</li>`).join('')
+      : '<li>Full ingredient list coming soon.</li>';
+
+    modalHowToUse.innerHTML = data.howToUse.length
+      ? data.howToUse.map(step => `<li>${step}</li>`).join('')
+      : '<li>Usage instructions coming soon.</li>';
+
+    modalPrecautions.innerHTML = data.precautions.length
+      ? data.precautions.map(p => `<li>${p}</li>`).join('')
+      : '<li>—</li>';
+
+    productModal.classList.add('open');
+    productModalOverlay.classList.add('open');
+    productModal.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeProductModal(){
+    productModal.classList.remove('open');
+    productModalOverlay.classList.remove('open');
+    productModal.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  }
+
+  productModalOverlay.addEventListener('click', closeProductModal);
+  productModalClose.addEventListener('click', closeProductModal);
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeProductModal(); });
+
+  modalAddBtn.addEventListener('click', () => {
+    if(!activeModalProduct) return;
+    addToCart(activeModalProduct.name, activeModalProduct.name, activeModalProduct.price);
+    closeProductModal();
+  });
+
   document.querySelectorAll('.product-card').forEach(card => {
     const addBtn = card.querySelector('.p-add');
     if(!addBtn) return;
     const name = card.querySelector('h3')?.textContent.trim() || 'Product';
     const priceText = card.querySelector('.p-price')?.textContent.trim() || 'Rs 0';
     const price = parseFloat(priceText.replace(/[^0-9.]/g,'')) || 0;
-    addBtn.addEventListener('click', () => addToCart(name, name, price));
+    addBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      addToCart(name, name, price);
+    });
+    card.addEventListener('click', () => openProductModal(card));
   });
 
   document.querySelectorAll('.offer-add').forEach(btn => {
     const name = btn.dataset.bundle || 'Bundle';
     const price = parseFloat(btn.dataset.price) || 0;
-    btn.addEventListener('click', () => addToCart('bundle-' + name, name, price));
+    btn.addEventListener('click', (e) => { e.stopPropagation(); addToCart('bundle-' + name, name, price); });
   });
 
   renderCart();
