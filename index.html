@@ -19,17 +19,17 @@
 <style>
   :root{
     --navy:#4D0E13;
-    --teal:#9C6F63;
+    --teal:#B8860B;
     --beige:#FFFFFF;
-    --sky:#D8C4AC;
+    --sky:#E3C77E;
     --white:#EEE4DA;
     --navy-70: rgba(77,14,19,.7);
     --navy-40: rgba(77,14,19,.4);
     --navy-12: rgba(77,14,19,.12);
-    --teal-soft: rgba(156,111,99,.14);
+    --teal-soft: rgba(184,134,11,.14);
     --ease: cubic-bezier(.22,1,.36,1);
     --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --font-secondary: 'Janda Stylish Script', 'Fraunces', cursive;
+    --font-secondary: var(--font-main);
   }
 
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -45,9 +45,11 @@
   ::selection{ background:var(--navy); color:var(--beige); }
 
   h1,h2,h3{ font-family:var(--font-main); font-weight:700; letter-spacing:-0.01em; line-height:1.05; color:var(--navy); }
-  /* "main words" — key emphasized words inside a heading — stay in the main font, bold + italic */
+  /* "main words" — key emphasized words inside a heading — stay in the main font, bold + italic, gold metallic */
   h1 em, h2 em, h3 em, h1 i, h2 i, h3 i, .accent-word{
-    font-family:var(--font-main); font-style:italic; font-weight:700; letter-spacing:0; color:var(--teal);
+    font-family:var(--font-main); font-style:italic; font-weight:700; letter-spacing:0;
+    background:linear-gradient(115deg, #7a5a15 0%, #d4af37 22%, #fdf6d8 42%, #d4af37 58%, #946e1c 78%, #d4af37 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   a{ color:inherit; text-decoration:none; }
   img,svg{ display:block; max-width:100%; }
@@ -110,7 +112,11 @@
     font-family:var(--font-main); font-size:21px; font-weight:700; letter-spacing:.01em;
     white-space:nowrap; flex-shrink:0;
   }
-  .logo em{ font-family:var(--font-secondary); font-style:italic; font-weight:700; color:var(--teal); margin-left:-4px; letter-spacing:-.01em; -webkit-text-stroke:.4px var(--teal); }
+  .logo em{
+    font-family:var(--font-secondary); font-style:italic; font-weight:700; margin-left:-4px; letter-spacing:-.01em;
+    background:linear-gradient(115deg, #7a5a15 0%, #d4af37 22%, #fdf6d8 42%, #d4af37 58%, #946e1c 78%, #d4af37 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
   nav.links{ display:flex; gap:38px; align-items:center; }
   nav.links a{
     font-family:var(--font-main); font-weight:700; font-size:13px; letter-spacing:.02em; color:var(--navy-70);
@@ -292,7 +298,7 @@
     color:var(--teal); margin-bottom:10px;
   }
   .modal-name{ font-family:var(--font-main); font-weight:700; font-size:24px; margin-bottom:14px; }
-  .modal-desc{ font-size:14px; color:var(--navy-70); line-height:1.65; margin-bottom:26px; }
+  .modal-desc{ font-family:var(--font-main); font-size:14px; color:var(--navy-70); line-height:1.65; margin-bottom:26px; }
   .modal-section{ margin-bottom:26px; }
   .modal-section h4{
     font-family:var(--font-main); font-weight:700; font-size:13px; letter-spacing:.02em;
@@ -300,13 +306,13 @@
   }
   .modal-ingredients{ list-style:none; }
   .modal-ingredients li{
-    font-size:13.5px; color:var(--navy-70); line-height:1.5; padding:11px 0; border-top:1px solid rgba(77,14,19,.1);
+    font-family:var(--font-main); font-size:13.5px; color:var(--navy-70); line-height:1.5; padding:11px 0; border-top:1px solid rgba(77,14,19,.1);
   }
   .modal-ingredients li:first-child{ border-top:none; }
   .modal-ingredients li b{ color:var(--navy); font-weight:700; }
   .modal-steps{ list-style:none; counter-reset:step; }
   .modal-steps li{
-    font-size:13.5px; color:var(--navy-70); line-height:1.5; padding:9px 0 9px 30px; position:relative;
+    font-family:var(--font-main); font-size:13.5px; color:var(--navy-70); line-height:1.5; padding:9px 0 9px 30px; position:relative;
     counter-increment:step;
   }
   .modal-steps li::before{
@@ -317,7 +323,7 @@
   }
   .modal-precautions{ list-style:none; }
   .modal-precautions li{
-    font-size:12.5px; color:var(--navy-40); line-height:1.55; padding:6px 0 6px 16px; position:relative;
+    font-family:var(--font-main); font-size:12.5px; color:var(--navy-40); line-height:1.55; padding:6px 0 6px 16px; position:relative;
   }
   .modal-precautions li::before{ content:'—'; position:absolute; left:0; color:var(--navy-40); }
   .modal-foot{
@@ -507,8 +513,6 @@
   .p1 .jar{ background:linear-gradient(155deg,var(--sky),var(--teal)); } .p1 .p-visual{ background:var(--teal-soft); }
   .p2 .jar{ background:linear-gradient(155deg,var(--white),var(--sky)); } .p2 .p-visual{ background:var(--teal-soft); }
   .p1 .p-visual-photo, .p2 .p-visual-photo, .p5 .p-visual-photo, .p6 .p-visual-photo, .p7 .p-visual-photo, .p8 .p-visual-photo{ background:transparent; }
-  .p3 .jar{ background:linear-gradient(155deg,var(--sky),var(--navy)); } .p3 .p-visual{ background:rgba(77,14,19,.06); }
-  .p4 .jar{ background:linear-gradient(155deg,var(--teal),var(--navy)); } .p4 .p-visual{ background:rgba(156,111,99,.10); }
 
   .product-card.featured{ background:var(--white); box-shadow:0 0 0 1px rgba(77,14,19,.12), inset 0 0 0 2px var(--teal); z-index:1; }
   .featured .p-visual{ height:240px; }
@@ -544,7 +548,9 @@
     display:flex; flex-direction:column; box-shadow:0 30px 60px -40px rgba(77,14,19,.3);
   }
   .offer-badge{
-    align-self:flex-start; background:var(--navy); color:var(--beige);
+    align-self:flex-start;
+    background:linear-gradient(120deg, #7a5a15 0%, #d4af37 30%, #f5e2a8 50%, #d4af37 70%, #7a5a15 100%);
+    color:var(--navy); font-weight:700;
     font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
     padding:6px 12px; border-radius:100px; margin-bottom:20px;
   }
@@ -713,11 +719,10 @@
 <header id="siteHeader">
   <a href="#top" class="logo">nova<em> skin</em></a>
   <nav class="links">
-    <a href="#ritual">Ritual</a>
+    <a href="#ritual">How to Use</a>
     <a href="#shop">Shop</a>
     <a href="#offers">Offers</a>
     <a href="#partners">For Partners</a>
-    <a href="dashboard.html">Dashboard</a>
   </nav>
   <div class="header-right">
     <a href="#shop" class="nav-cta">Shop Now</a>
@@ -743,11 +748,10 @@
 </div>
 
 <nav class="mobile-nav" id="mobileNav">
-  <a href="#ritual">Ritual</a>
+  <a href="#ritual">How to Use</a>
   <a href="#shop">Shop</a>
   <a href="#offers">Offers</a>
   <a href="#partners">For Partners</a>
-  <a href="dashboard.html">Dashboard</a>
   <a href="#shop" class="nav-cta">Shop Now</a>
 </nav>
 
@@ -903,9 +907,9 @@
   </div>
   <div class="hero-visual">
     <svg class="ripple-field" viewBox="0 0 500 560" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="250" cy="280" r="230" stroke="#9C6F63" stroke-opacity="0.18"/>
+      <circle cx="250" cy="280" r="230" stroke="#B8860B" stroke-opacity="0.18"/>
       <circle cx="250" cy="280" r="180" stroke="#4D0E13" stroke-opacity="0.10"/>
-      <circle cx="250" cy="280" r="130" stroke="#9C6F63" stroke-opacity="0.14"/>
+      <circle cx="250" cy="280" r="130" stroke="#B8860B" stroke-opacity="0.14"/>
     </svg>
     <div class="vlabel">N&deg;01 — NOVA SKIN</div>
     <div class="bottle bottle-photo">
@@ -946,7 +950,7 @@
         <h3 id="p2Name">Anti-Acne Serum</h3>
         <p class="p-desc" id="p2Desc">Aloe vera, niacinamide, and tea tree oil to clear blemishes, control oil, and soothe skin — fast repairing, dermatologist approved.</p>
         <div class="p-foot">
-          <span class="p-price" id="p2Price">Rs 4,500</span>
+          <span class="p-price" id="p2Price">Rs 2,800</span>
           <button class="p-add" aria-label="Add Anti-Acne Serum to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -960,32 +964,8 @@
         <h3 id="p1Name">Brightening Face Wash</h3>
         <p class="p-desc" id="p1Desc">Glutathione, niacinamide, and aloe vera for 10x brightness — deep clean, hydrate, and whiten in one step.</p>
         <div class="p-foot">
-          <span class="p-price" id="p1Price">Rs 2,800</span>
+          <span class="p-price" id="p1Price">Rs 1,200</span>
           <button class="p-add" aria-label="Add Brightening Face Wash to bag">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="product-card p3">
-        <div class="p-index">N&deg;03 — SEAL</div>
-        <div class="p-visual"></div>
-        <h3 id="p3Name">Depth Cream</h3>
-        <p class="p-desc" id="p3Desc">A barrier cream built on ceramides and squalane. Rich without ever feeling heavy.</p>
-        <div class="p-foot">
-          <span class="p-price" id="p3Price">Rs 4,800</span>
-          <button class="p-add" aria-label="Add Depth Cream to bag">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="product-card p4">
-        <div class="p-index">N&deg;04 — DEFEND</div>
-        <div class="p-visual"></div>
-        <h3 id="p4Name">Horizon SPF 40</h3>
-        <p class="p-desc" id="p4Desc">A mineral finish with zero white cast. The last, non-negotiable step, every morning.</p>
-        <div class="p-foot">
-          <span class="p-price" id="p4Price">Rs 3,200</span>
-          <button class="p-add" aria-label="Add Horizon SPF to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
@@ -998,7 +978,7 @@
         <h3 id="p5Name">Vitamin-C Whitening Serum</h3>
         <p class="p-desc" id="p5Desc">Brightens dull skin, fades dark spots, and boosts collagen — antioxidant protection for all skin types.</p>
         <div class="p-foot">
-          <span class="p-price" id="p5Price">Rs 4,200</span>
+          <span class="p-price" id="p5Price">Rs 2,500</span>
           <button class="p-add" aria-label="Add Vitamin-C Whitening Serum to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -1012,7 +992,7 @@
         <h3 id="p6Name">Acne Removal Face Wash</h3>
         <p class="p-desc" id="p6Desc">Maximum strength formula that clears existing acne, prevents new breakouts, and smooths skin texture — for acne and oily skin.</p>
         <div class="p-foot">
-          <span class="p-price" id="p6Price">Rs 3,600</span>
+          <span class="p-price" id="p6Price">Rs 1,200</span>
           <button class="p-add" aria-label="Add Acne Removal Face Wash to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -1026,7 +1006,7 @@
         <h3 id="p7Name">Sun Block SPF 60</h3>
         <p class="p-desc" id="p7Desc">Broad spectrum UVA/UVB protection with zinc. Light, non-greasy, paraben-free — suitable for all skin types.</p>
         <div class="p-foot">
-          <span class="p-price" id="p7Price">Rs 3,800</span>
+          <span class="p-price" id="p7Price">Rs 1,000</span>
           <button class="p-add" aria-label="Add Sun Block SPF 60 to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -1040,7 +1020,7 @@
         <h3 id="p8Name">Whitening Cream</h3>
         <p class="p-desc" id="p8Desc">Kojic acid, vitamin C, and glutathione to brighten skin tone, reduce dark spots, and deeply moisturize.</p>
         <div class="p-foot">
-          <span class="p-price" id="p8Price">Rs 4,600</span>
+          <span class="p-price" id="p8Price">Rs 2,500</span>
           <button class="p-add" aria-label="Add Whitening Cream to bag">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -1060,50 +1040,50 @@
   <div class="wrap">
     <div class="offers-grid reveal-stagger">
       <div class="offer-card">
-        <div class="offer-badge">Save Rs 1,300</div>
-        <h3>Morning Ritual Bundle</h3>
+        <div class="offer-badge">Save Rs 700</div>
+        <h3>Brightening Ritual Bundle</h3>
         <ul class="offer-includes">
-          <li>Tidal Cleanser</li>
-          <li>Hydra Serum</li>
-          <li>Horizon SPF 40</li>
+          <li>Brightening Face Wash</li>
+          <li>Anti-Acne Serum</li>
+          <li>Sun Block SPF 60</li>
         </ul>
         <div class="offer-price-row">
-          <span class="offer-old">Rs 10,500</span>
-          <span class="offer-new">Rs 9,200</span>
+          <span class="offer-old">Rs 5,000</span>
+          <span class="offer-new">Rs 4,300</span>
         </div>
-        <button class="offer-add btn-primary" type="button" data-bundle="Morning Ritual Bundle" data-price="9200">
+        <button class="offer-add btn-primary" type="button" data-bundle="Brightening Ritual Bundle" data-price="4300">
           Add bundle to bag
         </button>
       </div>
       <div class="offer-card">
-        <div class="offer-badge">Save Rs 1,600</div>
-        <h3>Repair Ritual Bundle</h3>
+        <div class="offer-badge">Save Rs 750</div>
+        <h3>Clear Skin Bundle</h3>
         <ul class="offer-includes">
-          <li>Tidal Cleanser</li>
-          <li>Hydra Serum</li>
-          <li>Depth Cream</li>
+          <li>Acne Removal Face Wash</li>
+          <li>Anti-Acne Serum</li>
+          <li>Sun Block SPF 60</li>
         </ul>
         <div class="offer-price-row">
-          <span class="offer-old">Rs 12,100</span>
-          <span class="offer-new">Rs 10,500</span>
+          <span class="offer-old">Rs 5,000</span>
+          <span class="offer-new">Rs 4,250</span>
         </div>
-        <button class="offer-add btn-primary" type="button" data-bundle="Repair Ritual Bundle" data-price="10500">
+        <button class="offer-add btn-primary" type="button" data-bundle="Clear Skin Bundle" data-price="4250">
           Add bundle to bag
         </button>
       </div>
       <div class="offer-card">
-        <div class="offer-badge">Save Rs 1,600</div>
-        <h3>Full Glow Bundle</h3>
+        <div class="offer-badge">Save Rs 900</div>
+        <h3>Glow &amp; Whiten Bundle</h3>
         <ul class="offer-includes">
-          <li>Hydra Serum</li>
-          <li>Depth Cream</li>
-          <li>Horizon SPF 40</li>
+          <li>Vitamin-C Whitening Serum</li>
+          <li>Whitening Cream</li>
+          <li>Brightening Face Wash</li>
         </ul>
         <div class="offer-price-row">
-          <span class="offer-old">Rs 12,500</span>
-          <span class="offer-new">Rs 10,900</span>
+          <span class="offer-old">Rs 6,200</span>
+          <span class="offer-new">Rs 5,300</span>
         </div>
-        <button class="offer-add btn-primary" type="button" data-bundle="Full Glow Bundle" data-price="10900">
+        <button class="offer-add btn-primary" type="button" data-bundle="Glow &amp; Whiten Bundle" data-price="5300">
           Add bundle to bag
         </button>
       </div>
@@ -1112,24 +1092,18 @@
 </section>
 
 <section class="ritual" id="ritual">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <h2>When it happens</h2>
-      <p>The order is the whole point — each step prepares your skin for the next.</p>
-    </div>
-  </div>
   <div class="wrap wrap-bleed">
     <div class="ritual-grid reveal-stagger">
       <div class="ritual-step">
         <div class="rn">01 / MORNING</div>
         <h3 id="r1Title">Wake the skin</h3>
-        <p id="r1Desc">Tidal Cleanser, then Hydra Serum, sealed with Horizon SPF before you leave the house.</p>
+        <p id="r1Desc">Brightening Face Wash, then Anti-Acne Serum, sealed with Sun Block SPF 60 before you leave the house.</p>
         <span class="time">2 MIN</span>
       </div>
       <div class="ritual-step">
         <div class="rn">02 / EVENING</div>
         <h3 id="r2Title">Let it repair</h3>
-        <p id="r2Desc">Cleanse away the day, layer the serum, and finish with Depth Cream while skin is still damp.</p>
+        <p id="r2Desc">Cleanse away the day, layer the serum, and finish with Whitening Cream while skin is still damp.</p>
         <span class="time">3 MIN</span>
       </div>
       <div class="ritual-step">
@@ -1486,18 +1460,6 @@
         "For external use only. Perform a patch test before use.",
         "Store in a cool, dry place away from children. Discontinue if irritation occurs."
       ]
-    },
-    p3: {
-      desc: "Full ingredient details for Depth Cream are coming soon.",
-      ingredients: [],
-      howToUse: [],
-      precautions: []
-    },
-    p4: {
-      desc: "Full ingredient details for Horizon SPF 40 are coming soon.",
-      ingredients: [],
-      howToUse: [],
-      precautions: []
     },
     p5: {
       desc: "Nova Skin Vitamin-C Whitening Serum is a powerful glow-boosting formula designed to brighten dull skin, even out skin tone, and reduce fine lines and wrinkles. Enriched with Vitamin C, Alpha Arbutin, L-Glutathione, and Hyaluronic Acid, it deeply hydrates skin cells and fades dark spots for a radiant, youthful complexion.",
