@@ -199,6 +199,7 @@
   .cart-item-info{ flex:1; min-width:0; }
   .cart-item-info .ci-name{ font-family:var(--font-main); font-weight:700; font-size:14px; margin-bottom:2px; }
   .cart-item-info .ci-price{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--teal); }
+  .ci-discount-note{ font-size:11px; color:var(--navy); font-weight:700; margin-top:3px; }
   .cart-item-qty{ display:flex; align-items:center; gap:8px; }
   .cart-item-qty button{
     width:32px; height:32px; border-radius:50%; border:1px solid var(--navy-40); background:none; cursor:pointer;
@@ -905,7 +906,7 @@
 
     <div class="modal-promo">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-      <span>Buy any 2 products and get <b>7% off</b> your order — discount applies automatically in your bag.</span>
+      <span>Buy <b>2 of this product</b> and get <b>7% off</b> — buy <b>3 or more</b> and get <b>15% off</b>. Applies per product, automatically in your bag.</span>
     </div>
 
     <div class="modal-section">
@@ -1357,7 +1358,7 @@
   // To receive orders by email automatically, get a free access key at
   // https://web3forms.com and paste it below. Until then, orders still
   // complete on-screen but aren't emailed anywhere.
-  const WEB3FORMS_ACCESS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY';
+  const WEB3FORMS_ACCESS_KEY = '53c35f07-589a-4063-bf63-7a5363b9cbb8';
   const WEB3FORMS_CONFIGURED = WEB3FORMS_ACCESS_KEY !== 'YOUR_WEB3FORMS_ACCESS_KEY';
   const DELIVERY_FEE = 200; // Rs — charged for COD, waived when paid in advance
 
@@ -1404,6 +1405,14 @@
 
   let cart = []; // { id, name, price, qty }
 
+  // Discount applies per product: buy 2 of the SAME product = 7% off that item,
+  // buy 3+ of the SAME product = 15% off that item. Mixing different products does not qualify.
+  function itemDiscountRate(qty){
+    if(qty >= 3) return 0.15;
+    if(qty === 2) return 0.07;
+    return 0;
+  }
+
   function openCart(){
     cartDrawer.classList.add('open'); cartOverlay.classList.add('open');
     cartDrawer.setAttribute('aria-hidden','false'); cartBtn.setAttribute('aria-expanded','true');
@@ -1441,6 +1450,10 @@
     } else {
       cartEmptyEl.style.display = 'none';
       cart.forEach(item => {
+        const rate = itemDiscountRate(item.qty);
+        const discountNote = rate > 0
+          ? `<div class="ci-discount-note">${Math.round(rate*100)}% off applied (${item.qty} of this item)</div>`
+          : '';
         const row = document.createElement('div');
         row.className = 'cart-item';
         row.innerHTML = `
@@ -1448,6 +1461,7 @@
           <div class="cart-item-info">
             <div class="ci-name">${item.name}</div>
             <div class="ci-price">Rs ${item.price.toLocaleString()}</div>
+            ${discountNote}
           </div>
           <div class="cart-item-qty">
             <button type="button" data-action="dec" aria-label="Decrease quantity">−</button>
@@ -1471,17 +1485,17 @@
     }
 
     const subtotal = cart.reduce((sum,i) => sum + i.qty * i.price, 0);
-    const qtyForDiscount = cart.reduce((sum,i) => sum + i.qty, 0);
-    const discountApplies = qtyForDiscount >= 2;
-    const discountAmount = discountApplies ? Math.round(subtotal * 0.07) : 0;
+    const discountedSubtotal = cart.reduce((sum,i) => sum + i.qty * i.price * (1 - itemDiscountRate(i.qty)), 0);
+    const discountAmount = Math.round(subtotal - discountedSubtotal);
     const finalSubtotal = subtotal - discountAmount;
+    const discountApplies = discountAmount > 0;
 
     cartDiscountRow.hidden = !discountApplies;
     cartDiscountAmountEl.textContent = '−Rs ' + discountAmount.toLocaleString();
     cartSubtotalEl.textContent = 'Rs ' + finalSubtotal.toLocaleString();
     cartPromoNote.textContent = discountApplies
-      ? '7% multi-buy discount applied. Cash on delivery, or pay in advance for free delivery.'
-      : 'Buy 2+ products and save 7%. Cash on delivery, or pay in advance for free delivery.';
+      ? 'Quantity discount applied. Cash on delivery, or pay in advance for free delivery.'
+      : 'Buy 2 of the same product for 7% off, or 3+ for 15% off. Cash on delivery, or pay in advance for free delivery.';
   }
 
   function addToCart(id, name, price){
@@ -1702,18 +1716,19 @@
   // --- checkout step ---
   function buildSummary(){
     const subtotal = cart.reduce((sum,i) => sum + i.qty * i.price, 0);
-    const qtyForDiscount = cart.reduce((sum,i) => sum + i.qty, 0);
-    const discountApplies = qtyForDiscount >= 2;
-    const discountAmount = discountApplies ? Math.round(subtotal * 0.07) : 0;
-    const discountedSubtotal = subtotal - discountAmount;
+    const discountedSubtotal = cart.reduce((sum,i) => sum + i.qty * i.price * (1 - itemDiscountRate(i.qty)), 0);
+    const discountAmount = Math.round(subtotal - discountedSubtotal);
+    const discountApplies = discountAmount > 0;
     const isAdvance = payAdvance.checked;
     const deliveryFee = isAdvance ? 0 : DELIVERY_FEE;
-    const total = discountedSubtotal + deliveryFee;
-    const rows = cart.map(i => `
-      <div class="cs-row"><span>${i.name} × ${i.qty}</span><span>Rs ${(i.qty * i.price).toLocaleString()}</span></div>
-    `).join('');
+    const total = Math.round(discountedSubtotal) + deliveryFee;
+    const rows = cart.map(i => {
+      const rate = itemDiscountRate(i.qty);
+      const label = rate > 0 ? `${i.name} × ${i.qty} (${Math.round(rate*100)}% off)` : `${i.name} × ${i.qty}`;
+      return `<div class="cs-row"><span>${label}</span><span>Rs ${(i.qty * i.price).toLocaleString()}</span></div>`;
+    }).join('');
     const discountRow = discountApplies
-      ? `<div class="cs-row"><span>Multi-buy discount (7%)</span><span>−Rs ${discountAmount.toLocaleString()}</span></div>`
+      ? `<div class="cs-row"><span>Quantity discount</span><span>−Rs ${discountAmount.toLocaleString()}</span></div>`
       : '';
     const deliveryRow = `<div class="cs-row"><span>Delivery</span><span>${isAdvance ? 'FREE' : 'Rs ' + deliveryFee}</span></div>`;
     checkoutSummaryEl.innerHTML = rows + discountRow + deliveryRow + `<div class="cs-row cs-total"><span>Total</span><span>Rs ${total.toLocaleString()}</span></div>`;
@@ -1758,14 +1773,18 @@
     checkoutErrorEl.hidden = true;
 
     const subtotal = cart.reduce((sum,i) => sum + i.qty * i.price, 0);
-    const qtyForDiscount = cart.reduce((sum,i) => sum + i.qty, 0);
-    const discountApplies = qtyForDiscount >= 2;
-    const discountAmount = discountApplies ? Math.round(subtotal * 0.07) : 0;
-    const discountedSubtotal = subtotal - discountAmount;
+    const discountedSubtotal = cart.reduce((sum,i) => sum + i.qty * i.price * (1 - itemDiscountRate(i.qty)), 0);
+    const discountAmount = Math.round(subtotal - discountedSubtotal);
+    const discountApplies = discountAmount > 0;
     const deliveryFee = isAdvance ? 0 : DELIVERY_FEE;
-    const total = discountedSubtotal + deliveryFee;
+    const total = Math.round(discountedSubtotal) + deliveryFee;
     const orderId = 'NS-' + Date.now().toString().slice(-6);
-    const summaryText = cart.map(i => `${i.name} x${i.qty} — Rs ${i.qty * i.price}`).join('\n');
+    const summaryText = cart.map(i => {
+      const rate = itemDiscountRate(i.qty);
+      return rate > 0
+        ? `${i.name} x${i.qty} (${Math.round(rate*100)}% off) — Rs ${i.qty * i.price}`
+        : `${i.name} x${i.qty} — Rs ${i.qty * i.price}`;
+    }).join('\n');
     const paymentLabel = isAdvance ? 'Paid in advance (free delivery)' : 'Cash on delivery';
 
     placeOrderBtn.disabled = true;
@@ -1787,7 +1806,7 @@
             customer_city: city,
             notes: coNotes.value.trim() || '—',
             order_summary: summaryText,
-            multi_buy_discount: discountApplies ? 'Rs ' + discountAmount.toLocaleString() + ' (7%)' : 'None',
+            multi_buy_discount: discountApplies ? 'Rs ' + discountAmount.toLocaleString() : 'None',
             delivery_fee: isAdvance ? 'Free (paid in advance)' : 'Rs ' + DELIVERY_FEE,
             order_total: 'Rs ' + total.toLocaleString(),
             payment_method: paymentLabel,
