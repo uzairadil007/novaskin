@@ -855,6 +855,10 @@
         <label for="coNotes">Order notes (optional)</label>
         <textarea id="coNotes" placeholder="e.g. preferred delivery time"></textarea>
       </div>
+      <div class="field">
+        <label for="coRef">Referral code (optional)</label>
+        <input type="text" id="coRef" placeholder="e.g. NOVA-JOY21" autocomplete="off" style="text-transform:uppercase;">
+      </div>
       <div class="checkout-summary" id="checkoutSummary"></div>
     </div>
 
@@ -1183,9 +1187,13 @@
           <div class="eyebrow" style="color:var(--sky);">Awaiting code</div>
           <p>Your tier, referral count, and bonus owed will appear here once we find your code.</p>
         </div>
+        <div class="bonus-state-empty" id="bonusNotFound" style="display:none;">
+          <div class="eyebrow" style="color:var(--sky);">Code not found</div>
+          <p>We couldn't find that referral code. Double-check it, or contact us if you think this is a mistake.</p>
+        </div>
         <div class="bonus-result" id="bonusResult">
-          <div class="tier">Gold Partner</div>
-          <div class="amount">Rs 48,600</div>
+          <div class="tier" id="bonusTier">Gold Partner</div>
+          <div class="amount" id="bonusAmount">Rs 48,600</div>
           <div class="row"><span>Referrals this month</span><span id="rRefs">23</span></div>
           <div class="row"><span>Conversion rate</span><span id="rConv">31%</span></div>
           <div class="row"><span>Next payout</span><span id="rPayout">Sep 1</span></div>
@@ -1332,20 +1340,50 @@
   }, { threshold:.4 });
   statEls.forEach(el => countIO.observe(el));
 
+  // ---------------- REFERRAL CODES ----------------
+  // Manually assign codes here. Add/edit/remove entries any time — this is
+  // the only place referral codes and their partner bonus stats live.
+  // Codes are matched case-insensitively.
+  const REFERRAL_CODES = {
+    'NOVA-JOY21': { tier: 'Gold Partner',   amount: 'Rs 48,600', refs: 23, conv: '31%', payout: 'Sep 1' },
+    'NOVA-AMNA10': { tier: 'Silver Partner', amount: 'Rs 18,200', refs: 11, conv: '22%', payout: 'Sep 1' },
+    // 'NOVA-XXXX': { tier: 'Bronze Partner', amount: 'Rs 6,400', refs: 4, conv: '18%', payout: 'Sep 1' },
+  };
+
   // referral bonus checker
   const checkBtn = document.getElementById('checkBonusBtn');
   const refInput = document.getElementById('refCode');
   const bonusEmpty = document.getElementById('bonusEmpty');
+  const bonusNotFound = document.getElementById('bonusNotFound');
   const bonusResult = document.getElementById('bonusResult');
+  const bonusTierEl = document.getElementById('bonusTier');
+  const bonusAmountEl = document.getElementById('bonusAmount');
   const applyDemo = document.getElementById('applyDemo');
+  const coRefInput = document.getElementById('coRef');
 
   function revealBonus(){
-    if(!refInput.value.trim()) {
+    const code = refInput.value.trim().toUpperCase();
+    if(!code) {
       refInput.focus();
       return;
     }
-    bonusResult.classList.add('show');
+    const data = REFERRAL_CODES[code];
     bonusEmpty.style.display = 'none';
+
+    if(data){
+      bonusNotFound.style.display = 'none';
+      bonusTierEl.textContent = data.tier;
+      bonusAmountEl.textContent = data.amount;
+      document.getElementById('rRefs').textContent = data.refs;
+      document.getElementById('rConv').textContent = data.conv;
+      document.getElementById('rPayout').textContent = data.payout;
+      bonusResult.classList.add('show');
+      // carry the verified code over to checkout so it's easy to use
+      if(coRefInput) coRefInput.value = code;
+    } else {
+      bonusResult.classList.remove('show');
+      bonusNotFound.style.display = 'flex';
+    }
   }
   checkBtn.addEventListener('click', revealBonus);
   refInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') revealBonus(); });
@@ -1387,6 +1425,7 @@
   const placeOrderBtn = document.getElementById('placeOrderBtn');
   const continueShoppingBtn = document.getElementById('continueShoppingBtn');
   const checkoutErrorEl = document.getElementById('checkoutError');
+  const coRef = document.getElementById('coRef');
   const successOrderIdEl = document.getElementById('successOrderId');
   const successPhoneEl = document.getElementById('successPhone');
   const successWarningEl = document.getElementById('successWarning');
@@ -1759,6 +1798,7 @@
     const city = coCity.value.trim();
     const isAdvance = payAdvance.checked;
     const txnId = coTxnId.value.trim();
+    const referralCode = coRef.value.trim().toUpperCase();
 
     if(!name || !phone || !address || !city){
       checkoutErrorEl.textContent = 'Please fill in your name, phone, address and city.';
@@ -1811,6 +1851,7 @@
             order_total: 'Rs ' + total.toLocaleString(),
             payment_method: paymentLabel,
             transaction_id: isAdvance ? txnId : '—',
+            referral_code: referralCode || 'None',
           })
         });
         emailed = res.ok;
@@ -1832,7 +1873,7 @@
 
     cart = [];
     renderCart();
-    coName.value = ''; coPhone.value = ''; coAddress.value = ''; coCity.value = ''; coNotes.value = ''; coTxnId.value = '';
+    coName.value = ''; coPhone.value = ''; coAddress.value = ''; coCity.value = ''; coNotes.value = ''; coTxnId.value = ''; coRef.value = '';
     payCod.checked = true;
     advanceInstructions.hidden = true;
   });
