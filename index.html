@@ -873,7 +873,7 @@
       <div class="field">
         <label for="coRef">Referral code (optional)</label>
         <div class="ref-apply-row">
-          <input type="text" id="coRef" placeholder="e.g. NOVA-JOY21" autocomplete="off" style="text-transform:uppercase;">
+          <input type="text" id="coRef" placeholder="e.g. JOY21" autocomplete="off" style="text-transform:uppercase;">
           <button type="button" id="applyRefBtn">Apply</button>
         </div>
         <p class="ref-feedback" id="coRefFeedback" hidden></p>
@@ -1195,7 +1195,7 @@
         <p style="color:var(--navy-70);font-size:14px;line-height:1.6;margin-bottom:30px;max-width:380px;">Enter the referral code you share with your community to see this month's earnings and tier.</p>
         <label for="refCode">Referral code</label>
         <div class="referral-input-row">
-          <input type="text" id="refCode" placeholder="e.g. NOVA-JOY21" autocomplete="off">
+          <input type="text" id="refCode" placeholder="e.g. JOY21" autocomplete="off">
           <button id="checkBonusBtn" type="button">Check bonus</button>
         </div>
         <p class="referral-hint">Don't have a code yet? <b id="applyDemo">Try a live example</b></p>
@@ -1364,22 +1364,22 @@
   // the only place referral codes and their partner bonus stats live.
   // Codes are matched case-insensitively.
   const REFERRAL_CODES = {
-    'NOVA-MARWA10':    { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-NOORIE10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-FIYA10':     { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-ANUM10':     { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-NOOR10':     { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-DRSUNDAS10': { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-AJ10':       { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-VELVET10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-RR10':       { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-MOMI10':     { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-LAIBA10':    { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-NAVEED10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-MERIUM10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-ALINA10':    { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-BUSHRA10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
-    'NOVA-RUBAY10A':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'MARWA10':    { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'NOORIE10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'FIYA10':     { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'ANUM10':     { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'NOOR10':     { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'DRSUNDAS10': { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'AJ10':       { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'VELVET10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'RR10':       { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'MOMI10':     { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'LAIBA10':    { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'NAVEED10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'MERIUM10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'ALINA10':    { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'BUSHRA10':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
+    'RUBAY10A':   { tier: 'Bronze Partner', amount: 'Rs 0', refs: 0, conv: '0%', payout: 'Sep 1' },
   };
 
   // referral bonus checker
@@ -1423,7 +1423,7 @@
   checkBtn.addEventListener('click', revealBonus);
   refInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') revealBonus(); });
   applyDemo.addEventListener('click', () => {
-    refInput.value = 'NOVA-JOY21';
+    refInput.value = 'JOY21';
     revealBonus();
   });
 
