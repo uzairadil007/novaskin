@@ -228,6 +228,18 @@
   .cart-note{ font-size:11.5px; color:var(--navy-40); text-align:center; margin-top:12px; }
   .cart-error{ color:#b3443a; }
 
+  .ref-apply-row{ display:flex; gap:8px; }
+  .ref-apply-row input{ flex:1; }
+  .ref-apply-row button{
+    flex-shrink:0; padding:0 16px; border:1px solid var(--navy); border-radius:8px;
+    background:var(--navy); color:#fff; font-family:var(--font-main); font-size:12.5px;
+    font-weight:700; cursor:pointer; transition:.2s;
+  }
+  .ref-apply-row button:hover{ background:var(--teal); border-color:var(--teal); }
+  .ref-feedback{ font-size:12px; margin-top:6px; line-height:1.4; }
+  .ref-feedback-ok{ color:var(--teal); font-weight:700; }
+  .ref-feedback-error{ color:#b3443a; }
+
   /* checkout form step */
   .checkout-note{ font-size:12.5px; color:var(--navy-70); line-height:1.5; margin-bottom:20px; }
   .checkout-view .field{ margin-bottom:14px; }
@@ -860,7 +872,11 @@
       </div>
       <div class="field">
         <label for="coRef">Referral code (optional)</label>
-        <input type="text" id="coRef" placeholder="e.g. NOVA-JOY21" autocomplete="off" style="text-transform:uppercase;">
+        <div class="ref-apply-row">
+          <input type="text" id="coRef" placeholder="e.g. NOVA-JOY21" autocomplete="off" style="text-transform:uppercase;">
+          <button type="button" id="applyRefBtn">Apply</button>
+        </div>
+        <p class="ref-feedback" id="coRefFeedback" hidden></p>
       </div>
       <div class="checkout-summary" id="checkoutSummary"></div>
     </div>
@@ -1394,8 +1410,11 @@
       document.getElementById('rConv').textContent = data.conv;
       document.getElementById('rPayout').textContent = data.payout;
       bonusResult.classList.add('show');
-      // carry the verified code over to checkout so it's easy to use
-      if(coRefInput) coRefInput.value = code;
+      // carry the verified code over to checkout and apply its 10% discount right away
+      if(coRefInput){
+        coRefInput.value = code;
+        if(typeof applyReferralCode === 'function') applyReferralCode();
+      }
     } else {
       bonusResult.classList.remove('show');
       bonusNotFound.style.display = 'flex';
@@ -1415,6 +1434,8 @@
   const WEB3FORMS_ACCESS_KEY = '53c35f07-589a-4063-bf63-7a5363b9cbb8';
   const WEB3FORMS_CONFIGURED = WEB3FORMS_ACCESS_KEY !== 'YOUR_WEB3FORMS_ACCESS_KEY';
   const DELIVERY_FEE = 200; // Rs — charged for COD, waived when paid in advance
+  const REFERRAL_DISCOUNT_RATE = 0.10; // 10% off the whole order when a valid referral code is applied
+  let appliedReferralCode = ''; // set once a code has been checked against REFERRAL_CODES and matched
 
   const cartBtn = document.getElementById('cartBtn');
   const cartOverlay = document.getElementById('cartOverlay');
@@ -1442,6 +1463,8 @@
   const continueShoppingBtn = document.getElementById('continueShoppingBtn');
   const checkoutErrorEl = document.getElementById('checkoutError');
   const coRef = document.getElementById('coRef');
+  const coRefFeedback = document.getElementById('coRefFeedback');
+  const applyRefBtn = document.getElementById('applyRefBtn');
   const successOrderIdEl = document.getElementById('successOrderId');
   const successPhoneEl = document.getElementById('successPhone');
   const successWarningEl = document.getElementById('successWarning');
@@ -1466,6 +1489,32 @@
     if(qty >= 3) return 0.15;
     if(qty === 2) return 0.07;
     return 0;
+  }
+
+  // Checks the code the shopper typed against the stored REFERRAL_CODES map.
+  // A match unlocks a flat 10% off the whole order (on top of any multi-buy discount).
+  function applyReferralCode(){
+    const code = coRef.value.trim().toUpperCase();
+
+    if(!code){
+      appliedReferralCode = '';
+      coRefFeedback.hidden = true;
+      buildSummary();
+      return;
+    }
+
+    if(REFERRAL_CODES[code]){
+      appliedReferralCode = code;
+      coRefFeedback.textContent = `Code ${code} applied — 10% off your order.`;
+      coRefFeedback.className = 'ref-feedback ref-feedback-ok';
+      coRefFeedback.hidden = false;
+    } else {
+      appliedReferralCode = '';
+      coRefFeedback.textContent = "We couldn't find that referral code — check it and try again.";
+      coRefFeedback.className = 'ref-feedback ref-feedback-error';
+      coRefFeedback.hidden = false;
+    }
+    buildSummary();
   }
 
   function openCart(){
@@ -1774,9 +1823,15 @@
     const discountedSubtotal = cart.reduce((sum,i) => sum + i.qty * i.price * (1 - itemDiscountRate(i.qty)), 0);
     const discountAmount = Math.round(subtotal - discountedSubtotal);
     const discountApplies = discountAmount > 0;
+
+    // Referral discount: 10% off the whole order value (applied after the multi-buy discount)
+    const referralActive = !!appliedReferralCode && !!REFERRAL_CODES[appliedReferralCode];
+    const referralAmount = referralActive ? Math.round(discountedSubtotal * REFERRAL_DISCOUNT_RATE) : 0;
+    const afterReferralSubtotal = discountedSubtotal - referralAmount;
+
     const isAdvance = payAdvance.checked;
     const deliveryFee = isAdvance ? 0 : DELIVERY_FEE;
-    const total = Math.round(discountedSubtotal) + deliveryFee;
+    const total = Math.round(afterReferralSubtotal) + deliveryFee;
     const rows = cart.map(i => {
       const rate = itemDiscountRate(i.qty);
       const label = rate > 0 ? `${i.name} × ${i.qty} (${Math.round(rate*100)}% off)` : `${i.name} × ${i.qty}`;
@@ -1785,8 +1840,11 @@
     const discountRow = discountApplies
       ? `<div class="cs-row"><span>Quantity discount</span><span>−Rs ${discountAmount.toLocaleString()}</span></div>`
       : '';
+    const referralRow = referralActive
+      ? `<div class="cs-row"><span>Referral code (${appliedReferralCode}, 10% off)</span><span>−Rs ${referralAmount.toLocaleString()}</span></div>`
+      : '';
     const deliveryRow = `<div class="cs-row"><span>Delivery</span><span>${isAdvance ? 'FREE' : 'Rs ' + deliveryFee}</span></div>`;
-    checkoutSummaryEl.innerHTML = rows + discountRow + deliveryRow + `<div class="cs-row cs-total"><span>Total</span><span>Rs ${total.toLocaleString()}</span></div>`;
+    checkoutSummaryEl.innerHTML = rows + discountRow + referralRow + deliveryRow + `<div class="cs-row cs-total"><span>Total</span><span>Rs ${total.toLocaleString()}</span></div>`;
     return total;
   }
 
@@ -1796,6 +1854,17 @@
   }
   payCod.addEventListener('change', toggleAdvanceInstructions);
   payAdvance.addEventListener('change', toggleAdvanceInstructions);
+
+  applyRefBtn.addEventListener('click', applyReferralCode);
+  coRef.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); applyReferralCode(); } });
+  coRef.addEventListener('input', () => {
+    // typing invalidates a previously-applied code until it's re-checked
+    if(appliedReferralCode && coRef.value.trim().toUpperCase() !== appliedReferralCode){
+      appliedReferralCode = '';
+      coRefFeedback.hidden = true;
+      buildSummary();
+    }
+  });
 
   cartCheckoutBtn.addEventListener('click', () => {
     if(cart.length === 0) return;
@@ -1828,12 +1897,20 @@
     }
     checkoutErrorEl.hidden = true;
 
+    // Re-check the referral code against the stored list one last time before charging the order,
+    // in case the shopper typed a code but never hit Apply.
+    if(referralCode && REFERRAL_CODES[referralCode]) appliedReferralCode = referralCode;
+    else if(referralCode && !REFERRAL_CODES[referralCode]) appliedReferralCode = '';
+
     const subtotal = cart.reduce((sum,i) => sum + i.qty * i.price, 0);
     const discountedSubtotal = cart.reduce((sum,i) => sum + i.qty * i.price * (1 - itemDiscountRate(i.qty)), 0);
     const discountAmount = Math.round(subtotal - discountedSubtotal);
     const discountApplies = discountAmount > 0;
+    const referralActive = !!appliedReferralCode && !!REFERRAL_CODES[appliedReferralCode];
+    const referralAmount = referralActive ? Math.round(discountedSubtotal * REFERRAL_DISCOUNT_RATE) : 0;
+    const afterReferralSubtotal = discountedSubtotal - referralAmount;
     const deliveryFee = isAdvance ? 0 : DELIVERY_FEE;
-    const total = Math.round(discountedSubtotal) + deliveryFee;
+    const total = Math.round(afterReferralSubtotal) + deliveryFee;
     const orderId = 'NS-' + Date.now().toString().slice(-6);
     const summaryText = cart.map(i => {
       const rate = itemDiscountRate(i.qty);
@@ -1863,11 +1940,12 @@
             notes: coNotes.value.trim() || '—',
             order_summary: summaryText,
             multi_buy_discount: discountApplies ? 'Rs ' + discountAmount.toLocaleString() : 'None',
+            referral_discount: referralActive ? 'Rs ' + referralAmount.toLocaleString() + ' (10%)' : 'None',
             delivery_fee: isAdvance ? 'Free (paid in advance)' : 'Rs ' + DELIVERY_FEE,
             order_total: 'Rs ' + total.toLocaleString(),
             payment_method: paymentLabel,
             transaction_id: isAdvance ? txnId : '—',
-            referral_code: referralCode || 'None',
+            referral_code: referralActive ? appliedReferralCode : (referralCode || 'None'),
           })
         });
         emailed = res.ok;
@@ -1890,6 +1968,8 @@
     cart = [];
     renderCart();
     coName.value = ''; coPhone.value = ''; coAddress.value = ''; coCity.value = ''; coNotes.value = ''; coTxnId.value = ''; coRef.value = '';
+    appliedReferralCode = '';
+    coRefFeedback.hidden = true;
     payCod.checked = true;
     advanceInstructions.hidden = true;
   });
