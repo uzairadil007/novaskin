@@ -1813,9 +1813,11 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   /* Double-tap guard: for a moment after the layout changes under the pointer (an overlay opens
      or closes, the checkout step appears, a line is removed) a second tap is ignored, so it can
      never land on a different button from the one that was aimed at. */
-  var guard = { ms: 400 }, lastShift = -1e9;
+  var guard = { ms: 400 }, lastShift = -1e9, checkoutAt = -1e9;
   function shifted() { lastShift = now(); }
   function tooSoon() { return now() - lastShift < guard.ms; }
+  /* placing an order takes a deliberate press: never within 0.7 s of the checkout appearing */
+  function tooSoonToOrder() { return tooSoon() || (guard.ms > 0 && now() - checkoutAt < Math.max(guard.ms, 700)); }
 
   /* ───────────── live region + toasts ───────────── */
   var liveEl = $('#live'), toastsEl = $('#toasts'), liveTimer;
@@ -2317,7 +2319,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   }
   var STEP_ORDER = ['bag', 'checkout', 'success'];
   function showStep(step, quiet) {
-    var changed = state.step !== step;
+    var changed = drawer.getAttribute('data-step') !== step;      /* compared with what is on screen */
     state.step = step;
     drawer.setAttribute('data-step', step);
     stepBag.hidden = step !== 'bag';
@@ -2332,8 +2334,11 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       li.classList.toggle('is-done', at < cur);
     });
     syncBusy();
+    if (changed) {                                 /* the buttons under the pointer are different ones now */
+      shifted(); clearToasts();
+      if (step === 'checkout') checkoutAt = now();
+    }
     if (quiet) return;
-    if (changed) { shifted(); clearToasts(); }
     placeToasts();
     var stepEl = step === 'bag' ? stepBag : step === 'checkout' ? stepCheckout : stepSuccess;
     var scroller = $('.step-scroll', stepEl);
@@ -2591,7 +2596,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   }
   function preflight() {
     if (state.sending) return false;
-    if (tooSoon()) return false;                  /* a second tap carried over from the Checkout button */
+    if (tooSoonToOrder()) return false;           /* a second tap carried over from the Checkout button */
     if (!state.bag.length) { showStep('bag'); return false; }
     state.submitted = true;
     if (!settleRef('checkout')) {
