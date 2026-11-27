@@ -244,10 +244,10 @@ s{text-decoration-thickness:1px}
 .incl li + li{padding-left:12px;border-left:1px solid var(--line)}
 .incl .label{display:block;margin-bottom:6px;font-size:10.5px;letter-spacing:.15em}
 .bundle-foot{margin:22px var(--pad) var(--pad);padding-top:22px;border-top:1px solid var(--line)}
-.bundle-price{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px;margin-bottom:20px}
+.bundle-price{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px;margin-bottom:20px;container-type:inline-size}
 .bundle-price s{font-size:15px;color:var(--ink-mute)}
 .bundle-price .now{font:400 30px/1 var(--serif);letter-spacing:-.015em}
-.save{margin-left:auto;align-self:center;padding:7px 10px;border:1px solid var(--gold);border-radius:var(--r);font:500 12.5px/1 var(--sans);letter-spacing:.03em;color:var(--bronze);white-space:nowrap}
+.save{align-self:center;padding:7px 10px;border:1px solid var(--gold);border-radius:var(--r);font:500 12.5px/1 var(--sans);letter-spacing:.03em;color:var(--bronze);white-space:nowrap}
 
 /* ───────────────────────── Routine ───────────────────────── */
 .routine-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px}
@@ -737,17 +737,30 @@ textarea.input{min-height:84px;resize:vertical}
 .rstep .label i{white-space:nowrap}
 .rstep .link{text-align:left}
 .rstep h4 button{display:inline-flex;align-items:center;min-height:32px}
+.rcard .btn{padding:0 10px}
+.lineup.has-wide img{width:25%}
+.lineup.has-wide img.lead{width:35%}
+.lineup.has-wide img.wide{width:36%}
 .sheet-foot .stepper{flex:none}
 
 @media (min-width:980px){
-  .fab{width:48px;height:48px}
+  .fab{width:48px;height:48px;right:max(8px,calc((100vw - 1440px)/2 + 8px))}
   .fab svg{width:23px;height:23px}
 }
 @media (min-width:980px) and (max-width:1199px){
   .cta .btn{padding:0 22px}
+  .shelf{min-height:150px;padding:22px 12px 15px}
+  .shelf-row{gap:4px}
 }
-@media (max-width:1180px){
-  .save{margin-left:0}
+@media (min-width:980px) and (max-width:1099px){
+  .trust li{padding:12px 8px;gap:8px;font-size:13px;white-space:nowrap}
+}
+@media (min-width:980px) and (max-width:1059px){
+  .cta{flex-wrap:nowrap}
+  .cta .btn{flex:1 1 0;min-width:0;padding:0 10px;font-size:14px}
+}
+@container (min-width:312px){
+  .save{margin-left:auto}
 }
 @media (max-width:979px){
   .ing li button{min-height:44px;padding:0 14px}
@@ -763,16 +776,24 @@ textarea.input{min-height:84px;resize:vertical}
   .steps li{height:34px}
   .toasts{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
   .chips{padding-top:6px;padding-bottom:6px;margin-top:18px}
-  .lineup{padding-left:3%;padding-right:3%}
-  .lineup img.wide{width:36%}
-  .stage-dots{left:auto;right:6px;bottom:2px}
+  .lineup{padding-bottom:52px}
+  .stage-dots{left:10px;right:auto;bottom:2px}
   .trust li{font-size:13px}
   .btn-sm{padding:0 16px}
 }
 @media (max-width:599px) and (max-height:700px){
   .sheet-stage{height:min(30vh,220px)}
 }
+@media (max-width:389px){
+  .acct div.long{flex-wrap:wrap;padding-top:8px}
+  .acct div.long dt{flex:1 0 100%}
+  .acct div.long dd{justify-content:space-between}
+  .trust li{padding-right:6px}
+}
 @media (max-width:374px){
+  .sheet-foot{gap:8px;padding-left:16px;padding-right:16px}
+  .sheet-foot .stepper{grid-template-columns:44px 24px 44px}
+  .sheet-foot .btn{padding:0 8px}
   .chips{gap:4px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
   .chip{padding:0 10px;font-size:12.5px}
 }
@@ -780,7 +801,6 @@ textarea.input{min-height:84px;resize:vertical}
   .trust ul{grid-template-columns:1fr}
   .trust li:nth-child(even){padding-left:0}
   .trust li + li{border-top:1px solid var(--line);border-left:0}
-  .save{margin-left:0}
   .advance{padding:14px 12px}
   .acct div{flex-wrap:wrap;padding:8px 4px 8px 12px}
   .acct dt{flex:1 0 100%;font-size:12.5px}
@@ -2038,6 +2058,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     if (state.undo && state.undo.line.id === id) dropUndo();
     saveBag();
     if (state.step !== 'bag') { state.step = 'bag'; state.order = null; }
+    if (overlay.cur !== 'bag') resetBagScroll();
     renderDrawer(id);
     openOverlay('bag', { opener: opener, focus: T('to-checkout', stepBag) });
     var pr = priceBag();
@@ -2286,6 +2307,14 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     }
   }
   function syncBusy() { drawer.setAttribute('data-busy', state.sending ? 'true' : 'false'); }
+  /* a freshly opened bag starts at the top (on short screens the whole step is the scroller) */
+  function resetBagScroll() {
+    [stepBag, stepCheckout, stepSuccess].forEach(function (s) {
+      s.scrollTop = 0;
+      var sc = $('.step-scroll', s);
+      if (sc) sc.scrollTop = 0;
+    });
+  }
   var STEP_ORDER = ['bag', 'checkout', 'success'];
   function showStep(step, quiet) {
     var changed = state.step !== step;
@@ -2306,8 +2335,10 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     if (quiet) return;
     if (changed) { shifted(); clearToasts(); }
     placeToasts();
-    var scroller = $('.step-scroll', step === 'bag' ? stepBag : step === 'checkout' ? stepCheckout : stepSuccess);
+    var stepEl = step === 'bag' ? stepBag : step === 'checkout' ? stepCheckout : stepSuccess;
+    var scroller = $('.step-scroll', stepEl);
     if (scroller) scroller.scrollTop = 0;
+    stepEl.scrollTop = 0;
     var h = $('#drawerTitle');
     h.setAttribute('tabindex', '-1');
     try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
@@ -2379,7 +2410,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       '<div><dt>' + esc(pay.walletLabel) + '</dt><dd><span class="num">' + esc(pay.walletNumber) + '</span><button class="copy" type="button" data-t="copy" data-copy="wallet" aria-label="Copy ' + esc(pay.walletLabel) + ' number">Copy</button></dd></div>' +
       '<div><dt>Account name</dt><dd class="plain">' + esc(pay.accountName) + '</dd></div>' +
       '<div><dt>Bank</dt><dd class="plain">' + esc(pay.bank) + '</dd></div>' +
-      '<div><dt>IBAN</dt><dd><span class="num brk">' + esc(pay.iban) + '</span><button class="copy" type="button" data-t="copy" data-copy="iban" aria-label="Copy IBAN">Copy</button></dd></div>' +
+      '<div class="long"><dt>IBAN</dt><dd><span class="num brk">' + esc(pay.iban) + '</span><button class="copy" type="button" data-t="copy" data-copy="iban" aria-label="Copy IBAN">Copy</button></dd></div>' +
       '<div><dt>Amount</dt><dd><span class="num" id="advAmount"></span><button class="copy" type="button" data-t="copy" data-copy="amount" aria-label="Copy amount">Copy</button></dd></div>' +
       '</dl>' + fieldHTML('coTxnId', 'Transaction ID', 'type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" maxlength="60" placeholder="From your payment confirmation"') +
       '</div></div>' +
@@ -2584,6 +2615,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       if (overlay.cur !== 'bag') { state.step = 'checkout'; openOverlay('bag'); }
       if (ok) { finishOrder(o); return; }
       state.failed = true;
+      shifted();
       updateCheckout();
       showStep('checkout', true);
       var panel = $('#coFailed');
@@ -2686,7 +2718,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       var again = $('[data-t="bag-line"][data-id="' + s.bundleId + '"] [data-t="qty-inc"]', stepBag) || T('to-checkout', stepBag);
       if (again) { try { again.focus({ preventScroll: true }); } catch (err) { again.focus(); } }
     }
-    else if (t === 'ref-apply') { var inp = T('ref-input', el.closest('.refbox')); applyRef(inp ? inp.value : ''); }
+    else if (t === 'ref-apply') { var inp = T('ref-input', el.closest('.refbox')); applyRef(inp ? inp.value : '', true); }
     else if (t === 'ref-remove') removeRef();
     else if (t === 'to-checkout') goToCheckout();
     else if (t === 'back-to-bag') { flushDraft(); showStep('bag'); }
@@ -2762,7 +2794,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   drawer.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' || e.isComposing) return;
     var el = e.target;
-    if (el.getAttribute('data-t') === 'ref-input') { e.preventDefault(); applyRef(el.value); return; }
+    if (el.getAttribute('data-t') === 'ref-input') { e.preventDefault(); applyRef(el.value, true); return; }
     if (el.tagName !== 'INPUT' || !stepCheckout.contains(el)) return;
     e.preventDefault();
     if (el.type === 'radio' || el.type === 'checkbox') return;
@@ -2784,6 +2816,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     if (!productById[id]) return;
     state.sheet = { id: id, qty: 1 };
     renderSheet();
+    sheet.scrollTop = 0;
     openOverlay('product', Object.assign({ id: id, focus: T('sheet-close', sheet) }, opts || {}));
   }
   function detailsHTML(title, body, open) {
@@ -2842,7 +2875,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     else if (had === inc && inc.disabled && !dec.disabled) dec.focus();
     var add = T('sheet-add', sheet);
     add.disabled = room <= 0;
-    add.textContent = room <= 0 ? 'Maximum in your bag' : (inBag ? 'Add ' + qty + ' more · ' : 'Add to bag · ') + fmt(cost);
+    add.innerHTML = room <= 0 ? 'Maximum in your bag' : '<span>' + (inBag ? 'Add ' + qty + ' more' : 'Add to bag') + ' <span class="nb">· ' + esc(fmt(cost)) + '</span></span>';
     var note;
     if (after.rate > 0) note = (inBag ? 'You\'ll have ' + total + ' in your bag · ' : qty + ' × ' + fmt(p.price) + ' · ') + pct(after.rate) + ' multi-buy saving';
     else note = 'Buy 2 and save ' + pct(STORE.multiBuy.two) + ', or 3 and save ' + pct(STORE.multiBuy.threeOrMore) + '.';
@@ -2903,7 +2936,8 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     var auto = !reducedMotion && BUNDLES.length > 1, paused = false;
     var PAUSE = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2.500v7M8 2.500v7"/></svg>', PLAY = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2.200 9.500 6 4 9.800z"/></svg>';
     stage.innerHTML = BUNDLES.map(function (b, i) {
-      return '<div class="slide' + (i === 0 ? ' is-on' : '') + '" data-slide="' + i + '"' + (i ? ' aria-hidden="true"' : '') + '><div class="lineup">' +
+      var wide = b.items.some(function (pid) { var im = productById[pid].image; return im.w > im.h; });
+      return '<div class="slide' + (i === 0 ? ' is-on' : '') + '" data-slide="' + i + '"' + (i ? ' aria-hidden="true"' : '') + '><div class="lineup' + (wide ? ' has-wide' : '') + '">' +
         b.items.map(function (pid, k) { return img(pid, productById[pid].name, k === 1 ? 'lead' : ''); }).join('') + '</div></div>';
     }).join('') +
       '<p class="stage-cap"><a href="#bundles"><span>Pictured —&nbsp;</span><b id="stageName"></b></a><span class="num" id="stagePrice"></span></p>' +
@@ -2963,6 +2997,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   }
   /* Packshots share one row at one scale whatever the card width: each takes a share of the row
      in proportion to its own shape, so nothing is cropped and nothing shrinks out of step. */
+  function nameHTML(name) { return esc(name).replace(/(\S+-\S+)/g, '<span class="nb">$1</span>'); }
   function shelfShare(pid) {
     var im = productById[pid].image, ratio = im.w / im.h;
     return ratio > 1 ? ratio * 0.7 : ratio;        /* box-and-jar shots are shorter objects than bottles */
@@ -2978,7 +3013,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
           return '<button type="button" data-open="' + pid + '" aria-haspopup="dialog" aria-label="View ' + esc(productById[pid].name) + '" style="flex-grow:' + shelfShare(pid).toFixed(3) + '">' + img(pid, '') + '</button>';
         }).join('') + '</div></div>' +
         '<ul class="incl">' + b.items.map(function (pid) {
-          return '<li><span class="label">' + esc(productById[pid].step) + '</span>' + esc(productById[pid].name) + '</li>';
+          return '<li><span class="label">' + esc(productById[pid].step) + '</span>' + nameHTML(productById[pid].name) + '</li>';
         }).join('') + '</ul>' +
         '<div class="bundle-foot">' + priceBlock(b) +
         '<button class="btn btn-primary btn-block" type="button" data-t="bundle-add" data-add="' + b.id + '" aria-label="Add bundle to bag: ' + esc(b.name) + '">Add bundle to bag</button></div></li>';
@@ -2999,14 +3034,14 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
           '<p class="label">' + esc(s.step) + (s.extra ? ' <i>Optional add-on</i>' : '') + '</p>' +
           '<h4><button type="button" data-open="' + p.id + '" aria-haspopup="dialog">' + esc(p.name) + '</button></h4>' +
           '<p>' + esc(s.how) + '</p>' +
-          (s.extra ? '<button class="link" type="button" data-add="' + p.id + '"><span>Add ' + esc(p.name) + ' · <span class="nb">' + fmt(p.price) + '</span></span></button>' : '') +
+          (s.extra ? '<button class="link" type="button" data-add="' + p.id + '"><span>Add ' + esc(p.name) + ' <span class="nb">· ' + fmt(p.price) + '</span></span></button>' : '') +
           '</div></li>';
       }).join('') + '</ol></div>';
     }
     var save = Pricing.bundleSeparately(b) - b.price;
     $('#routinePanel').innerHTML = part('Morning', I.sun, r.morning) + part('Evening', I.moon, r.evening) +
       '<aside class="rcard"><p class="label">The routine</p><h3>' + esc(b.name) + '</h3><p class="bundle-blurb">' + esc(b.blurb) + '</p>' + priceBlock(b) +
-      '<button class="btn btn-primary btn-block" type="button" data-t="routine-add" data-add="' + b.id + '">Add this routine · ' + fmt(b.price) + '</button>' +
+      '<button class="btn btn-primary btn-block" type="button" data-t="routine-add" data-add="' + b.id + '"><span>Add this routine <span class="nb">· ' + fmt(b.price) + '</span></span></button>' +
       (save > 0 ? '<p class="fine">You save ' + fmt(save) + ' compared with buying each piece.</p>' : '') +
       (r.tip ? '<p class="tip">' + esc(r.tip) + '</p>' : '') + '</aside>';
     hydrateImages($('#routinePanel'));
@@ -3202,7 +3237,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     var id = href.slice(1);
     if (overlay.cur) closeOverlay(function () { scrollToId(id); }); else scrollToId(id);
   });
-  $('#bagOpen').addEventListener('click', function () { if (tooSoon()) return; renderDrawer(); openOverlay('bag', { opener: this }); });
+  $('#bagOpen').addEventListener('click', function () { if (tooSoon()) return; resetBagScroll(); renderDrawer(); openOverlay('bag', { opener: this }); });
   $('#menuOpen').addEventListener('click', function () { if (tooSoon()) return; openOverlay('menu', { opener: this, focus: T('menu-close') }); });
   T('menu-close').addEventListener('click', function () { if (!tooSoon()) closeOverlay(); });
 
@@ -3211,8 +3246,8 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     var header = $('#siteHeader'), fab = $('#fab');
     if (!('IntersectionObserver' in window)) { fab.classList.remove('is-away'); return; }
     /* the WhatsApp button appears once the page is scrolled, and steps aside at the footer */
-    var atTop = true, atFooter = false;
-    function placeFab() { fab.classList.toggle('is-away', atTop || atFooter); }
+    var atTop = true, atFooter = false, atFaq = false;
+    function placeFab() { fab.classList.toggle('is-away', atTop || atFooter || atFaq); }
     new IntersectionObserver(function (entries) {
       atTop = entries[0].isIntersecting;
       header.classList.toggle('is-stuck', !atTop);
@@ -3234,6 +3269,11 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       atFooter = entries[0].isIntersecting;
       placeFab();
     }, { rootMargin: '0px 0px -40px 0px' }).observe(footer);
+    var faqList = $('#faqList');
+    if (faqList) new IntersectionObserver(function (entries) {
+      atFaq = entries[0].isIntersecting;
+      placeFab();
+    }, { rootMargin: '0px 0px -60px 0px' }).observe(faqList);
     if (reducedMotion) return;
     root.classList.add('js-reveal');
     var showAll = function () { $$('.rv').forEach(function (el) { el.classList.add('is-in'); }); };
@@ -3264,7 +3304,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     getBag: function () { return state.bag.map(function (l) { return { id: l.id, qty: l.qty }; }); },
     setBag: function (lines) { setBag(lines); },
     clearBag: function () { setBag([]); },
-    open: function (what, id) { if (what === 'product') openProduct(id); else if (what === 'bag') { renderDrawer(); openOverlay('bag'); } else if (what === 'menu') openOverlay('menu'); },
+    open: function (what, id) { if (what === 'product') openProduct(id); else if (what === 'bag') { if (overlay.cur !== 'bag') resetBagScroll(); renderDrawer(); openOverlay('bag'); } else if (what === 'menu') openOverlay('menu'); },
     close: function () { closeOverlay(); },
     buildOrderText: buildOrderText,
     normalisePhone: normalisePhone,
