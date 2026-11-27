@@ -962,7 +962,7 @@ textarea.input{min-height:84px;resize:vertical}
         <header class="section-head narrow rv">
           <div>
             <h2 id="bundles-title">Routines, bundled</h2>
-            <p class="sub"><span data-bind="bundleCount">Three</span> complete routines, priced better than buying each piece.</p>
+            <p class="sub" data-bind="bundleLine">Three complete routines, priced better than buying each piece.</p>
           </div>
         </header>
         <ul class="bundle-grid" id="bundleGrid"></ul>
@@ -1167,14 +1167,15 @@ const STORE = {
   name: 'Nova Skin',
   currency: 'Rs',
   liveHost: 'novaskinofficial.com',        // orders placed anywhere else are marked [TEST]
-  whatsapp: '923125542063',                // customer WhatsApp, international format, digits only
+  whatsapp: '923125542063',                // customer WhatsApp, international format, digits only. The same number is also written
+                                           // in the no-JavaScript notice near the top of the page: change it there too.
   whatsappDisplay: '+92 312 5542063',      // the same number as customers should read it
   web3formsKey: '53c35f07-589a-4063-bf63-7a5363b9cbb8',   // where order emails are sent from
 
   delivery: {
     fee: 200,                    // cash-on-delivery delivery charge
     freeOver: 3000,              // free delivery when the goods total is this much or more. Write null to switch off.
-    freeWhenPaidInAdvance: true, // advance payment ships free. If you change this to false, also reword the delivery answers in the FAQ below.
+    freeWhenPaidInAdvance: true, // advance payment ships free (true) or pays the same delivery as everyone else (false)
   },
   multiBuy: { two: 0.07, threeOrMore: 0.15 },   // same product ×2 → 7% off that item, ×3 or more → 15% off
   referralRate: 0.10,                           // referral code → 10% off the order
@@ -1462,13 +1463,14 @@ const INGREDIENT_GUIDE = [
 ];
 
 /* ── FAQ ─────────────────────────────────────────────────────────────────────
-   {fee} {freeOver} {two} {three} {ref} {whatsapp} are filled in from the settings above. */
+   {fee} {freeOver} {two} {three} {ref} {whatsapp} are filled in from the settings above.
+   {advanceFree?text A|text B} shows text A while advance payment ships free, otherwise text B (B may be left out). */
 const FAQ = [
   { q: 'How do I pay?',
-    a: 'Choose cash on delivery and pay when your parcel arrives, or pay in advance by Easypaisa, JazzCash or bank transfer. Orders paid in advance always ship free.' },
+    a: 'Choose cash on delivery and pay when your parcel arrives, or pay in advance by Easypaisa, JazzCash or bank transfer.{advanceFree? Orders paid in advance always ship free.}' },
   { q: 'How much is delivery?',
-    a: '{fee} on cash-on-delivery orders under {freeOver}. Delivery is free on orders of {freeOver} or more, and on every order paid in advance.',
-    aNoThreshold: '{fee} on cash-on-delivery orders. Delivery is free on every order paid in advance.' },
+    a: '{fee} on {advanceFree?cash-on-delivery orders|orders} under {freeOver}. Delivery is free on orders of {freeOver} or more{advanceFree?, and on every order paid in advance}.',
+    aNoThreshold: '{fee} on {advanceFree?cash-on-delivery orders|every order}.{advanceFree? Delivery is free on every order paid in advance.}' },
   { q: 'What happens after I order?',
     a: 'You\'ll see your order number on screen, and we phone you to confirm the details before your order ships. Please enter a number you\'ll answer.' },
   { q: 'How do the discounts work?',
@@ -1707,47 +1709,79 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
      Numbers written as text ('1,200') are read as numbers; anything that cannot be
      read stops the shop and shows the "order on WhatsApp" notice instead. */
   (function checkSettings() {
-    function num(v) { return typeof v === 'number' ? v : Number(String(v == null ? '' : v).replace(/[,\s]/g, '')); }
-    function money(v, what) {
+    function present(v) { return !(v === null || v === undefined || (typeof v === 'string' && v.trim() === '')); }
+    function num(v) { return typeof v === 'number' ? v : Number(String(v).replace(/[,\s]/g, '')); }
+    /* a price must be there and be more than nothing; only the delivery fee may be 0 */
+    function money(v, what, zeroAllowed) {
+      if (!present(v)) throw new Error('Shop settings: ' + what + ' is missing.');
       var n = Math.round(num(v));
-      if (!isFinite(n) || n < 0) throw new Error('Shop settings: ' + what + ' is not a valid amount.');
+      if (!isFinite(n) || n < 0 || (n === 0 && !zeroAllowed)) throw new Error('Shop settings: ' + what + ' is not a valid amount.');
       return n;
     }
     function rate(v, what) {
+      if (!present(v)) throw new Error('Shop settings: ' + what + ' is missing.');
       var n = num(v);
       if (isFinite(n) && n >= 1 && n <= 100) n = n / 100;          /* 7 means 7% */
       if (!isFinite(n) || n < 0 || n >= 1) throw new Error('Shop settings: ' + what + ' is not a valid percentage.');
       return n;
     }
+    function text(v) { return present(v) ? String(v) : ''; }
+    function list(v) { return Array.isArray(v) ? v : []; }
     function warn(msg) { try { window.console.warn('Shop settings: ' + msg); } catch (e) { /* no console */ } }
-    var known = Object.create(null), i;
+    function prune(arr, keep, what) {
+      for (var k = arr.length - 1; k >= 0; k--) if (!keep(arr[k])) { warn(what + ' is incomplete, so it is hidden.'); arr.splice(k, 1); }
+    }
 
+    /* the "order on WhatsApp" notice follows the number in the settings, whatever else goes wrong below */
+    STORE.whatsapp = String(STORE.whatsapp || '').replace(/\D/g, '');
+    var shown = '+' + STORE.whatsapp.slice(0, 2) + ' ' + STORE.whatsapp.slice(2, 5) + ' ' + STORE.whatsapp.slice(5);
+    if (!present(STORE.whatsappDisplay) || String(STORE.whatsappDisplay).replace(/\D/g, '') !== STORE.whatsapp) STORE.whatsappDisplay = shown;
+    if (STORE.whatsapp.length >= 10) {
+      var noticeLink = $('#shopDown a');
+      if (noticeLink) { noticeLink.href = 'https://wa.me/' + STORE.whatsapp; noticeLink.textContent = 'WhatsApp ' + STORE.whatsappDisplay; }
+    }
+
+    var known = Object.create(null);
+    prune(PRODUCTS, function (p) {
+      if (!p || typeof p.id !== 'string' || !p.id || !present(p.name) || known[p.id]) return false;
+      known[p.id] = true;
+      return true;
+    }, 'A product without an id or name, or with an id used twice,');
     if (!PRODUCTS.length) throw new Error('Shop settings: there are no products.');
-    PRODUCTS.forEach(function (p) { p.price = money(p.price, 'the price of ' + p.name); known[p.id] = true; });
-    for (i = BUNDLES.length - 1; i >= 0; i--) {
-      var b = BUNDLES[i];
-      b.price = money(b.price, 'the price of ' + b.name);
-      if (!b.items.every(function (id) { return known[id]; })) { warn(b.name + ' lists a product that does not exist, so it is hidden.'); BUNDLES.splice(i, 1); }
-    }
+    PRODUCTS.forEach(function (p) {
+      p.name = String(p.name);
+      p.price = money(p.price, 'the price of ' + p.name);
+      p.step = text(p.step); p.size = text(p.size); p.short = text(p.short); p.long = text(p.long);
+      p.ingredients = list(p.ingredients).filter(function (x) { return Array.isArray(x) && present(x[0]); }).map(function (x) { return [String(x[0]), text(x[1])]; });
+      p.howToUse = list(p.howToUse).map(text); p.precautions = list(p.precautions).map(text);
+      if (!p.image || !(p.image.w > 0) || !(p.image.h > 0)) p.image = { w: 540, h: 720 };   /* no picture given: keep the page whole */
+    });
+
     var bundles = Object.create(null);
-    BUNDLES.forEach(function (x) { bundles[x.id] = true; });
-    for (i = ROUTINES.length - 1; i >= 0; i--) {
-      var r = ROUTINES[i];
-      if (!bundles[r.bundle]) { ROUTINES.splice(i, 1); continue; }
-      ['morning', 'evening'].forEach(function (k) { r[k] = (r[k] || []).filter(function (s) { return known[s.id]; }); });
-    }
+    prune(BUNDLES, function (b) {
+      if (!b || typeof b.id !== 'string' || !b.id || !present(b.name) || known[b.id] || bundles[b.id]) return false;
+      if (!Array.isArray(b.items) || !b.items.length || !b.items.every(function (id) { return known[id]; })) return false;
+      bundles[b.id] = true;
+      return true;
+    }, 'A bundle that lists a product that does not exist');
+    BUNDLES.forEach(function (b) { b.name = String(b.name); b.blurb = text(b.blurb); b.price = money(b.price, 'the price of ' + b.name); });
+
+    prune(ROUTINES, function (r) { return r && present(r.id) && present(r.label) && bundles[r.bundle]; }, 'A routine without its bundle');
+    ROUTINES.forEach(function (r) {
+      ['morning', 'evening'].forEach(function (k) { r[k] = list(r[k]).filter(function (st) { return st && known[st.id]; }); });
+    });
+    prune(INGREDIENT_GUIDE, function (g) { return g && present(g.name); }, 'An ingredient without a name');
+    INGREDIENT_GUIDE.forEach(function (g) { g.line = text(g.line); g.match = list(g.match).map(function (m) { return String(m).toLowerCase(); }); });
+    prune(FAQ, function (f) { return f && present(f.q) && present(f.a); }, 'A question without an answer');
 
     var d = STORE.delivery;
-    d.fee = money(d.fee, 'the delivery fee');
-    d.freeOver = (d.freeOver === null || d.freeOver === undefined || d.freeOver === '') ? null : money(d.freeOver, 'the free-delivery amount');
+    d.fee = money(d.fee, 'the delivery fee', true);
+    d.freeOver = present(d.freeOver) ? money(d.freeOver, 'the free-delivery amount') : null;
     STORE.multiBuy.two = rate(STORE.multiBuy.two, 'the two-item saving');
     STORE.multiBuy.threeOrMore = rate(STORE.multiBuy.threeOrMore, 'the three-item saving');
     STORE.referralRate = rate(STORE.referralRate, 'the referral saving');
     var max = Math.floor(num(STORE.maxQtyPerLine));
     STORE.maxQtyPerLine = isFinite(max) && max >= 1 ? max : 20;
-
-    STORE.whatsapp = String(STORE.whatsapp || '').replace(/\D/g, '');
-    if (!STORE.whatsappDisplay) STORE.whatsappDisplay = '+' + STORE.whatsapp.slice(0, 2) + ' ' + STORE.whatsapp.slice(2, 5) + ' ' + STORE.whatsapp.slice(5);
     STORE.social = STORE.social || {};
 
     /* referral codes are matched in capitals, however they were typed here */
@@ -1812,7 +1846,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       name: str(src.name), phone: str(src.phone), address: str(src.address), city: str(src.city),
       notes: str(draft.notes), txn: str(draft.txn), save: draftKept
     },
-    step: 'bag', sending: false, failed: false, order: null, pendingId: '', submitted: false, undo: null, coNote: '',
+    step: 'bag', sending: false, failed: false, order: null, pendingId: '', submitted: false, undos: Object.create(null), rows: [], coNote: '',
     filter: 'all', routine: ROUTINES.length ? ROUTINES[0].id : '', slide: 0, sheet: { id: '', qty: 1 }
   };
   /* The bag always shows the cash-on-delivery figure; checkout shows the chosen payment method. */
@@ -1822,11 +1856,25 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   /* Double-tap guard: for a moment after the layout changes under the pointer (an overlay opens
      or closes, the checkout step appears, a line is removed) a second tap is ignored, so it can
      never land on a different button from the one that was aimed at. */
-  var guard = { ms: 500 }, lastShift = -1e9, checkoutAt = -1e9;
+  var guard = { ms: 480 }, lastShift = -1e9, checkoutAt = -1e9;
   function shifted() { lastShift = now(); }
-  function tooSoon() { return now() - lastShift < guard.ms; }
+  /* A tap that comes too soon is ignored and restarts the wait, so the guard ends only once the tapping stops. */
+  function tooSoon() {
+    if (!(now() - lastShift < guard.ms)) return false;
+    lastShift = now();
+    return true;
+  }
   /* placing an order takes a deliberate press: never within 0.7 s of the checkout appearing */
-  function tooSoonToOrder() { return tooSoon() || (guard.ms > 0 && now() - checkoutAt < Math.max(guard.ms, 700)); }
+  function tooSoonToOrder() {
+    if (tooSoon()) return true;
+    if (guard.ms > 0 && now() - checkoutAt < Math.max(guard.ms, 700)) { lastShift = now(); return true; }
+    return false;
+  }
+  /* One gate in front of every control on the page and in every panel. */
+  doc.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('button,a,summary,label,input,select,textarea,[data-open],[data-add],.scrim')) return;
+    if (tooSoon()) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
 
   /* ───────────── live region + toasts ───────────── */
   var liveEl = $('#live'), toastsEl = $('#toasts'), liveTimer, liveWrite;
@@ -1979,7 +2027,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     placeToasts();
     try { if (/^#product-/.test(location.hash)) window.history.replaceState(null, '', cleanUrl()); } catch (e) { /* sandboxed */ }
     if (name === 'bag' && state.step === 'success') { state.step = 'bag'; state.order = null; renderDrawer(); }
-    if (name === 'bag' && state.undo) { dropUndo(); renderDrawer(); }
+    if (name === 'bag' && hasUndos()) { dropUndo(); renderDrawer(); }
     var op = overlay.opener, after = overlay.after;
     overlay.opener = null; overlay.after = null;
     if (after) {
@@ -2055,6 +2103,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
 
   function setBag(lines) {
     state.bag = Pricing.sanitiseLines(lines);
+    dropUndo();
     saveBag();
     renderDrawer();
   }
@@ -2066,7 +2115,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     if (line) line.qty = Math.min(line.qty + qty, STORE.maxQtyPerLine);
     else state.bag.push({ id: id, qty: Math.min(qty, STORE.maxQtyPerLine) });
     var added = lineOf(id).qty - before;
-    if (state.undo && state.undo.line.id === id) dropUndo();
+    dropUndo(id);
     saveBag();
     if (state.step !== 'bag') { state.step = 'bag'; state.order = null; }
     if (overlay.cur !== 'bag') resetBagScroll();
@@ -2088,31 +2137,58 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     var pr = shownPrice();
     announce(Pricing.item(id).ref.name + ', quantity ' + line.qty + '. Total ' + plain(pr.total) + '.');
   }
-  /* A removed line leaves a "Removed · Undo" row in its place. It stays until the bag changes
-     again or is closed, so nothing on screen moves by itself. */
-  function dropUndo() { state.undo = null; }
+  /* Each removed line leaves a "Removed · Undo" row exactly where the line was. The rows stay until
+     the bag is closed, so nothing on screen moves by itself.
+     state.rows is the list as shown (lines and removed rows); state.undos holds the removed lines. */
+  function hasUndos() { return Object.keys(state.undos).length > 0; }
+  function dropUndo(id) {
+    if (!id) { state.undos = Object.create(null); return; }
+    if (!state.undos[id]) return;
+    delete state.undos[id];
+    state.rows = state.rows.filter(function (x) { return x !== id; });
+  }
+  /* the rows to show, in order: everything already listed that still exists, then any new lines */
+  function shownOrder() {
+    var live = Object.create(null);
+    state.bag.forEach(function (l) { live[l.id] = true; });
+    var seq = state.rows.filter(function (id) { return live[id] || state.undos[id]; });
+    state.bag.forEach(function (l) { if (seq.indexOf(l.id) < 0) seq.push(l.id); });
+    /* lines must appear in bag order; if something outside this list changed that, start again from the bag */
+    var liveSeq = seq.filter(function (id) { return live[id]; });
+    if (liveSeq.join('|') !== state.bag.map(function (l) { return l.id; }).join('|')) {
+      seq = state.bag.map(function (l) { return l.id; }).concat(seq.filter(function (id) { return !live[id]; }));
+    }
+    state.rows = seq;
+    return seq;
+  }
   function removeLine(id) {
     var index = -1;
     state.bag.forEach(function (l, i) { if (l.id === id) index = i; });
     if (index < 0) return;
+    shownOrder();                                  /* the row keeps the place the line has now */
     var removed = state.bag.splice(index, 1)[0];
     var name = Pricing.item(id).ref.name;
-    state.undo = { line: removed, index: index, name: name };
+    state.undos[id] = { line: removed, name: name };
     shifted();
     saveBag();
     if (!state.bag.length && state.step === 'checkout') state.step = 'bag';
     renderDrawer();
-    var undoBtn = T('undo', stepBag);
+    var undoBtn = $('[data-t="bag-undo"][data-id="' + id + '"] [data-t="undo"]', stepBag);
     if (undoBtn && state.step === 'bag' && overlay.cur === 'bag') { try { undoBtn.focus({ preventScroll: true }); } catch (e) { undoBtn.focus(); } }
     announce(name + ' removed from bag. Undo is available.');
   }
-  function undoRemove() {
-    var u = state.undo;
+  function undoRemove(id) {
+    var u = state.undos[id];
     if (!u) return;
-    dropUndo();
-    if (!lineOf(u.line.id)) { state.bag.splice(Math.min(u.index, state.bag.length), 0, u.line); saveBag(); }
-    renderDrawer(u.line.id);
-    var back = $('[data-t="bag-line"][data-id="' + u.line.id + '"] [data-t="line-remove"]', stepBag);
+    delete state.undos[id];
+    if (!lineOf(id)) {
+      var before = 0;                              /* how many lines are shown above this row */
+      for (var i = 0; i < state.rows.length && state.rows[i] !== id; i++) if (lineOf(state.rows[i])) before++;
+      state.bag.splice(Math.min(before, state.bag.length), 0, u.line);
+      saveBag();
+    }
+    renderDrawer(id);
+    var back = $('[data-t="bag-line"][data-id="' + id + '"] [data-t="line-remove"]', stepBag);
     if (back) { try { back.focus({ preventScroll: true }); } catch (e) { back.focus(); } }
     announce(u.name + ' is back in your bag.');
   }
@@ -2227,17 +2303,25 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   }
   var currentSuggestion = null;
 
-  function undoHTML() {
-    var u = state.undo;
-    return '<li class="line-undo" data-t="bag-undo"><span>Removed <b>' + esc(u.name) + '</b></span>' +
+  function undoHTML(id) {
+    var u = state.undos[id];
+    return '<li class="line-undo" data-t="bag-undo" data-id="' + id + '"><span>Removed <b>' + esc(u.name) + '</b></span>' +
       '<button class="btn btn-ghost btn-sm" type="button" data-t="undo" aria-label="Undo: put ' + esc(u.name) + ' back in your bag">Undo</button></li>';
   }
+  /* what the bag is made of: when this changes, different buttons are under the pointer */
+  var bagShape = null;
+  function noteShape(seq) {
+    var shape = seq.map(function (id) { return (state.undos[id] ? '~' : '') + id; }).join(',') + '|' + (state.ref ? 'code' : '');
+    if (bagShape !== null && shape !== bagShape && overlay.cur === 'bag') shifted();
+    bagShape = shape;
+  }
   function renderBag(freshId) {
-    var pr = priceBag();
+    var pr = priceBag(), seq = shownOrder();
+    noteShape(seq);
     if (!pr.lines.length) {
       var last = storage.get(KEYS.last, null);
       var canReorder = last && Pricing.sanitiseLines(last.lines).length > 0;
-      stepBag.innerHTML = '<div class="step-scroll">' + (state.undo ? '<ul class="lines">' + undoHTML() + '</ul>' : '') +
+      stepBag.innerHTML = '<div class="step-scroll">' + (seq.length ? '<ul class="lines">' + seq.map(undoHTML).join('') + '</ul>' : '') +
         '<div class="empty" data-t="bag-empty"><p class="label">Nothing here yet</p><h3>Your bag is empty.</h3>' +
         '<p>Start with a cleanser, or pick a ready-made routine.</p>' +
         '<a class="btn btn-primary" href="#shop">Browse the collection</a>' +
@@ -2247,8 +2331,9 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       return;
     }
     currentSuggestion = Pricing.suggestBundle(state.bag, { pay: 'cod', refCode: state.ref });
-    var rows = pr.lines.map(function (l) { return lineHTML(l, l.id === freshId); });
-    if (state.undo) rows.splice(Math.min(state.undo.index, rows.length), 0, undoHTML());
+    var priced = Object.create(null);
+    pr.lines.forEach(function (l) { priced[l.id] = l; });
+    var rows = seq.map(function (id) { return priced[id] ? lineHTML(priced[id], id === freshId) : undoHTML(id); });
     var single = pr.lines.some(function (l) { return l.qty === 1; });
     var note = pr.deliveryReason === 'fee' && advanceFree ? 'Delivery is free when you pay in advance.' : 'Cash on delivery or advance payment.';
     /* the suggestion sits under the lines: when it comes and goes, no quantity button moves */
@@ -2275,8 +2360,8 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     var from = focused ? a : (pressed && container.contains(pressed) ? pressed : null), key = null, before = 0;
     var inner = $('.step-scroll', container), y = inner ? inner.scrollTop : 0;
     if (from) {
-      var line = from.closest('[data-t="bag-line"]');
-      key = { t: from.getAttribute('data-t'), id: line ? line.getAttribute('data-id') : null, pos: null };
+      var line = from.closest('[data-t="bag-line"],[data-t="bag-undo"]');
+      key = { t: from.getAttribute('data-t'), row: line ? '[data-t="' + line.getAttribute('data-t') + '"][data-id="' + line.getAttribute('data-id') + '"]' : null, pos: null };
       before = from.getBoundingClientRect().top;
       if (focused) { try { key.pos = a.selectionStart; } catch (e) { /* not a text field */ } }
     }
@@ -2284,7 +2369,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     inner = $('.step-scroll', container);
     if (inner && y) inner.scrollTop = y;
     if (!key) return;
-    var scope = key.id ? $('[data-t="bag-line"][data-id="' + key.id + '"]', container) : container;
+    var scope = key.row ? $(key.row, container) : container;
     var el = key.t && scope ? $('[data-t="' + key.t + '"]', scope) : null;
     if (el) {
       var sc = scrollerOf(container), moved = el.getBoundingClientRect().top - before;
@@ -2523,7 +2608,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   function goToCheckout() {
     if (!state.bag.length) return;
     if (!settleRef('bag')) return;
-    if (state.undo) { dropUndo(); renderDrawer(); }
+    if (hasUndos()) { dropUndo(); renderDrawer(); }
     if (!stepCheckout.firstChild) renderCheckout(); else updateCheckout();
     showStep('checkout');
   }
@@ -2736,7 +2821,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     else if (t === 'qty-inc' && id) changeQty(id, 1);
     else if (t === 'qty-dec' && id) changeQty(id, -1);
     else if (t === 'line-remove' && id) removeLine(id);
-    else if (t === 'undo') undoRemove();
+    else if (t === 'undo') undoRemove(el.closest('[data-t="bag-undo"]').getAttribute('data-id'));
     else if (t === 'success-restore') restoreOrder();
     else if (t === 'suggestion-apply' && currentSuggestion) {
       var s = currentSuggestion, b = bundleById[s.bundleId];
@@ -2771,9 +2856,10 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     else if (t === 'clear-details') {
       window.clearTimeout(draftTimer); draftDirty = false;
       storage.del(KEYS.customer); storage.del(KEYS.draft); session.del(KEYS.draft);
-      ['name', 'phone', 'address', 'city'].forEach(function (k) { state.co[k] = ''; });
-      ['coName', 'coPhone', 'coAddress', 'coCity'].forEach(function (fid) { var f = $('#' + fid); if (f) f.value = ''; });
-      updateCheckout();
+      ['name', 'phone', 'address', 'city', 'notes', 'txn'].forEach(function (k) { state.co[k] = ''; });
+      ['coName', 'coPhone', 'coAddress', 'coCity', 'coNotes', 'coTxnId'].forEach(function (fid) { var f = $('#' + fid); if (f) f.value = ''; });
+      state.co.pay = 'cod'; state.pendingId = '';
+      renderDrawer();
       toast('Saved details cleared');
       $('#coName').focus();
     }
@@ -3007,6 +3093,10 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   }
   /* Packshots share one row at one scale whatever the card width: each takes a share of the row
      in proportion to its own shape, so nothing is cropped and nothing shrinks out of step. */
+  /* a section that is switched off takes its links with it */
+  function hideLinksTo(id) {
+    $$('a[href="#' + id + '"]').forEach(function (a) { (a.parentNode.tagName === 'LI' ? a.parentNode : a).hidden = true; });
+  }
   function nameHTML(name) { return esc(name).replace(/(\S+-\S+)/g, '<span class="nb">$1</span>'); }
   function shelfShare(pid) {
     var im = productById[pid].image, ratio = im.w / im.h;
@@ -3015,6 +3105,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   function renderBundles() {
     var sec = $('#bundles');
     if (sec) sec.hidden = !BUNDLES.length;
+    if (!BUNDLES.length) hideLinksTo('bundles');
     $('#bundleGrid').innerHTML = BUNDLES.map(function (b, i) {
       var total = b.items.reduce(function (s, pid) { return s + shelfShare(pid); }, 0);
       return '<li class="bundle rv" data-t="bundle-card" data-id="' + b.id + '" style="transition-delay:' + i * 70 + 'ms"><div class="bundle-head"><p class="label">Routine ' + pad(i + 1) + '</p>' +
@@ -3031,7 +3122,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   }
   function renderRoutine() {
     var sec = $('#routine');
-    if (!ROUTINES.length) { if (sec) sec.hidden = true; return; }
+    if (!ROUTINES.length) { if (sec) sec.hidden = true; hideLinksTo('routine'); return; }
     $('#routineTabs').innerHTML = ROUTINES.map(function (r) {
       return '<button class="chip" type="button" data-t="routine-tab" data-goal="' + r.id + '" aria-pressed="' + (r.id === state.routine) + '">' + esc(r.label) + '</button>';
     }).join('');
@@ -3078,7 +3169,9 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   }
   function fillTokens(s) {
     var social = socialNames();
-    return s.replace(/\{fee\}/g, fmt(STORE.delivery.fee))
+    return String(s || '')
+      .replace(/\{advanceFree\?([^|}]*)(?:\|([^}]*))?\}/g, function (all, yes, no) { return advanceFree ? yes : (no || ''); })
+      .replace(/\{fee\}/g, fmt(STORE.delivery.fee))
       .replace(/\{freeOver\}/g, hasThreshold ? fmt(STORE.delivery.freeOver) : '')
       .replace(/\{two\}/g, pct(STORE.multiBuy.two)).replace(/\{three\}/g, pct(STORE.multiBuy.threeOrMore))
       .replace(/\{ref\}/g, pct(STORE.referralRate)).replace(/\{whatsapp\}/g, STORE.whatsappDisplay.replace(/ /g, ' '))
@@ -3098,7 +3191,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       two: pct(STORE.multiBuy.two), three: pct(STORE.multiBuy.threeOrMore), ref: pct(STORE.referralRate),
       year: String(new Date().getFullYear()),
       productCount: word(PRODUCTS.length), productCountLower: word(PRODUCTS.length).toLowerCase(),
-      bundleCount: word(BUNDLES.length),
+      bundleLine: (BUNDLES.length === 1 ? 'One complete routine' : word(BUNDLES.length) + ' complete routines') + ', priced better than buying each piece.',
       freeDeliveryLine: hasThreshold ? 'Free delivery over ' + fmt(STORE.delivery.freeOver) : advanceFree ? 'Free delivery when you pay in advance' : 'Delivery across Pakistan'
     };
     $$('[data-bind]').forEach(function (el) { var k = el.getAttribute('data-bind'); if (values[k] != null) el.textContent = values[k]; });
@@ -3122,7 +3215,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       var data = {
         '@context': 'https://schema.org', '@graph': [
           { '@type': 'Organization', '@id': base + '#org', name: STORE.name, url: base,
-            sameAs: Object.keys(STORE.social).map(function (k) { return STORE.social[k]; }),
+            sameAs: Object.keys(STORE.social).map(function (k) { return STORE.social[k]; }).filter(Boolean),
             contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', telephone: '+' + STORE.whatsapp, areaServed: 'PK', availableLanguage: ['en', 'ur'] } },
           { '@type': 'ItemList', name: STORE.name + ' collection', itemListElement: PRODUCTS.map(function (p, i) {
             return { '@type': 'ListItem', position: i + 1, item: {
@@ -3301,8 +3394,8 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
 
   /* bag changed in another tab */
   window.addEventListener('storage', function (e) {
-    if (e.key === KEYS.bag) { state.bag = Pricing.sanitiseLines(storage.get(KEYS.bag, [])); if (!state.sending) renderDrawer(); }
-    if (e.key === KEYS.ref) { state.ref = Pricing.normaliseRef(storage.get(KEYS.ref, '')); if (!state.sending) renderDrawer(); }
+    if (e.key === KEYS.bag) { state.bag = Pricing.sanitiseLines(storage.get(KEYS.bag, [])); state.pendingId = ''; dropUndo(); if (!state.sending) renderDrawer(); }
+    if (e.key === KEYS.ref) { state.ref = Pricing.normaliseRef(storage.get(KEYS.ref, '')); state.pendingId = ''; if (!state.sending) renderDrawer(); }
   });
 
   /* ───────────── public handle (also used by tests) ───────────── */
@@ -3336,6 +3429,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     try { fn(); } catch (e) { try { window.console.error('Nova Skin: part of the page could not be shown.', e); } catch (e2) { /* no console */ } }
   }
   [renderBindings, renderAnnounce, renderStage, renderGrid, renderBundles, renderRoutine, renderIngredients, renderFaq, renderJsonLd].forEach(safely);
+  if (!$('[data-t="product-card"]')) throw new Error('Shop settings: the collection could not be shown.');
   renderDrawer();
   safely(setupObservers);
   hydrateImages(doc);
