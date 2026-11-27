@@ -124,9 +124,9 @@ s{text-decoration-thickness:1px}
 
 /* ───────────────────────── Announcement ───────────────────────── */
 .announce{background:var(--green);color:var(--on-green);font:400 12.5px/1.35 var(--sans);letter-spacing:.04em;text-align:center}
-.announce ul{position:relative;display:grid;min-height:40px;padding:0 var(--edge)}
-.announce li{grid-area:1/1;display:flex;align-items:center;justify-content:center;padding:6px 0;opacity:0;visibility:hidden;transition:opacity .6s ease,visibility 0s linear .6s}
-.announce li.is-on{opacity:1;visibility:visible;transition:opacity .6s ease}
+.announce ul{position:relative;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0 36px;min-height:40px;padding:6px var(--edge)}
+.announce li{position:relative;padding:3px 0}
+.announce li + li::before{content:"";position:absolute;left:-20px;top:50%;width:3px;height:3px;margin-top:-1.5px;border-radius:50%;background:var(--gold-light)}
 
 /* ───────────────────────── Header ───────────────────────── */
 #sentinel{height:1px;margin-bottom:-1px}
@@ -175,7 +175,8 @@ s{text-decoration-thickness:1px}
 .stage-dots button[data-slide-to]::before{content:"";width:16px;height:2px;background:var(--ink);opacity:.58;transition:opacity .3s ease,width .3s var(--ease)}
 .stage-dots button[aria-pressed="true"]::before{width:30px;opacity:1}
 .stage-dots button[data-slide-to]:hover::before{opacity:1}
-.stage-pause svg{width:12px;height:12px;fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
+.stage-pause{color:var(--ink)}
+.stage-pause svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
 .stage-pause:hover svg{opacity:1}
 
 /* Trust row */
@@ -383,14 +384,14 @@ textarea.input{min-height:84px;resize:vertical}
 .line-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
 .line h3{margin-top:6px;font:400 20px/1.2 var(--serif);letter-spacing:-.01em;text-wrap:balance}
 .line-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:3px}
-.multi{font-size:12.5px;color:var(--bronze)}
+.multi{margin-top:10px;font-size:12.5px;line-height:1.4;color:var(--bronze)}
 .line-ctrl{display:flex;align-items:center;gap:6px;margin-top:12px}
 .stepper{display:inline-grid;grid-template-columns:44px 30px 44px;align-items:center;height:46px;border:1px solid var(--line-strong);border-radius:var(--r);background:#fff}
 .stepper button{display:grid;place-items:center;height:44px}
 .stepper button:hover:not(:disabled){background:var(--stone)}
 .stepper button:disabled{opacity:.35}
 .stepper svg{width:11px;height:11px;stroke:currentColor;stroke-width:1.4;fill:none;stroke-linecap:round}
-.stepper output{text-align:center;font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.stepper .q{text-align:center;font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
 .remove{min-height:44px;padding:0 10px;font-size:13px;color:var(--ink-mute);text-decoration:underline;text-decoration-color:var(--line-strong);text-underline-offset:4px}
 .remove:hover{color:var(--ink);text-decoration-color:currentColor}
 .suggest{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-top:16px;padding:16px 18px;background:var(--green-tint);border-radius:var(--r);font-size:14px;line-height:1.5}
@@ -635,9 +636,8 @@ textarea.input{min-height:84px;resize:vertical}
   .section h2{font-size:40px}
   .section-head{margin-bottom:32px}
   .section-head .sub,.sub{margin-top:12px;font-size:16px;line-height:1.5}
-  .chips{flex-wrap:nowrap;margin:24px calc(-1 * var(--edge)) 0;padding:0 var(--edge);gap:6px;overflow-x:auto;scrollbar-width:none}
-  .chips::-webkit-scrollbar{display:none}
-  .chip{flex:none;min-width:44px;padding:0 12px;font-size:13px;letter-spacing:0}
+  .chips{flex-wrap:wrap;margin-top:24px;gap:6px}
+  .chip{flex:none;min-width:44px;padding:0 11px;font-size:13px;letter-spacing:0}
 
   .grid{gap:40px 14px}
   .tile{aspect-ratio:1/1.2}
@@ -729,6 +729,7 @@ textarea.input{min-height:84px;resize:vertical}
 .line-undo b{font-weight:500;color:var(--ink)}
 .line-undo .btn{flex:none}
 .bag-tip{margin-top:14px;font-size:13px;line-height:1.5;color:var(--ink-mute)}
+.foot-note{margin-bottom:12px;padding:10px 12px;background:var(--green-tint);border-radius:var(--r);font-size:14px;line-height:1.45}
 .drawer[data-busy="true"] [data-t="drawer-close"]{opacity:.35;cursor:not-allowed}
 .btn[aria-disabled="true"]{cursor:progress}
 .fine .link{font-size:inherit}
@@ -743,6 +744,12 @@ textarea.input{min-height:84px;resize:vertical}
 .lineup.has-wide img.wide{width:36%}
 .sheet-foot .stepper{flex:none}
 
+@media (max-width:979px){
+  .announce li:nth-child(n+2){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+}
+@media (min-width:980px) and (max-width:1365px){
+  .announce li:nth-child(n+3){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+}
 @media (min-width:980px){
   .fab{width:48px;height:48px;right:max(8px,calc((100vw - 1440px)/2 + 8px))}
   .fab svg{width:23px;height:23px}
@@ -775,7 +782,6 @@ textarea.input{min-height:84px;resize:vertical}
   .steps{padding:0 20px;gap:18px}
   .steps li{height:34px}
   .toasts{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
-  .chips{padding-top:6px;padding-bottom:6px;margin-top:18px}
   .lineup{padding-bottom:52px}
   .stage-dots{left:10px;right:auto;bottom:2px}
   .trust li{font-size:13px}
@@ -794,8 +800,6 @@ textarea.input{min-height:84px;resize:vertical}
   .sheet-foot{gap:8px;padding-left:16px;padding-right:16px}
   .sheet-foot .stepper{grid-template-columns:44px 24px 44px}
   .sheet-foot .btn{padding:0 8px}
-  .chips{gap:4px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
-  .chip{padding:0 10px;font-size:12.5px}
 }
 @media (max-width:359px){
   .trust ul{grid-template-columns:1fr}
@@ -831,7 +835,10 @@ textarea.input{min-height:84px;resize:vertical}
 @media (forced-colors:active){
   .chip[aria-pressed="true"]{background:Highlight;color:HighlightText;border-color:Highlight;forced-color-adjust:none}
   .pay-card input:checked + .dot::after{background:Highlight;forced-color-adjust:none}
-  .stage-dots button::before{background:ButtonText;forced-color-adjust:none}
+  .stage-dots button[data-slide-to]::before{background:ButtonText;opacity:.6;forced-color-adjust:none}
+  .stage-dots button[data-slide-to][aria-pressed="true"]::before{background:Highlight;opacity:1}
+  .stage-pause{color:ButtonText}
+  .meter{outline:1px solid CanvasText}
   .meter span{background:Highlight;forced-color-adjust:none}
   .scrim{background:Canvas;opacity:.7}
   .steps li[aria-current="step"]::after{background:Highlight}
@@ -1803,7 +1810,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       name: str(src.name), phone: str(src.phone), address: str(src.address), city: str(src.city),
       notes: str(draft.notes), txn: str(draft.txn), save: draftKept
     },
-    step: 'bag', sending: false, failed: false, order: null, pendingId: '', submitted: false, undo: null,
+    step: 'bag', sending: false, failed: false, order: null, pendingId: '', submitted: false, undo: null, coNote: '',
     filter: 'all', routine: ROUTINES.length ? ROUTINES[0].id : '', slide: 0, sheet: { id: '', qty: 1 }
   };
   /* The bag always shows the cash-on-delivery figure; checkout shows the chosen payment method. */
@@ -1813,7 +1820,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   /* Double-tap guard: for a moment after the layout changes under the pointer (an overlay opens
      or closes, the checkout step appears, a line is removed) a second tap is ignored, so it can
      never land on a different button from the one that was aimed at. */
-  var guard = { ms: 400 }, lastShift = -1e9, checkoutAt = -1e9;
+  var guard = { ms: 500 }, lastShift = -1e9, checkoutAt = -1e9;
   function shifted() { lastShift = now(); }
   function tooSoon() { return now() - lastShift < guard.ms; }
   /* placing an order takes a deliberate press: never within 0.7 s of the checkout appearing */
@@ -1975,6 +1982,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     placeToasts();
     try { if (/^#product-/.test(location.hash)) window.history.replaceState(null, '', cleanUrl()); } catch (e) { /* sandboxed */ }
     if (name === 'bag' && state.step === 'success') { state.step = 'bag'; state.order = null; renderDrawer(); }
+    if (name === 'bag' && state.undo) { dropUndo(); renderDrawer(); }
     var op = overlay.opener, after = overlay.after;
     overlay.opener = null; overlay.after = null;
     if (after) {
@@ -2079,31 +2087,16 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     var pr = shownPrice();
     announce(Pricing.item(id).ref.name + ', quantity ' + line.qty + '. Total ' + plain(pr.total) + '.');
   }
-  /* A removed line leaves a "Removed · Undo" row in its place for a few seconds. */
-  function dropUndo() {
-    if (!state.undo) return;
-    window.clearTimeout(state.undo.timer);
-    state.undo = null;
-  }
-  function armUndo() {
-    window.clearTimeout(state.undo.timer);
-    state.undo.timer = window.setTimeout(function () {
-      if (!state.undo) return;
-      var a = doc.activeElement;
-      if (a && a.getAttribute && a.getAttribute('data-t') === 'undo') { armUndo(); return; }   /* never vanish from under the keyboard */
-      state.undo = null;
-      renderDrawer();
-    }, 8000);
-  }
+  /* A removed line leaves a "Removed · Undo" row in its place. It stays until the bag changes
+     again or is closed, so nothing on screen moves by itself. */
+  function dropUndo() { state.undo = null; }
   function removeLine(id) {
     var index = -1;
     state.bag.forEach(function (l, i) { if (l.id === id) index = i; });
     if (index < 0) return;
     var removed = state.bag.splice(index, 1)[0];
     var name = Pricing.item(id).ref.name;
-    dropUndo();
-    state.undo = { line: removed, index: index, name: name, timer: 0 };
-    armUndo();
+    state.undo = { line: removed, index: index, name: name };
     shifted();
     saveBag();
     if (!state.bag.length && state.step === 'checkout') state.step = 'bag';
@@ -2123,7 +2116,8 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     announce(u.name + ' is back in your bag.');
   }
 
-  function applyRef(value, quiet) {
+  /* quiet: no toast (the chip and the new row are the confirmation); silent: the caller announces */
+  function applyRef(value, quiet, silent) {
     var typed = String(value == null ? '' : value).trim();
     if (!typed) { state.refError = ''; state.refDraft = ''; renderDrawer(); return false; }
     var code = Pricing.normaliseRef(typed);
@@ -2133,7 +2127,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       state.pendingId = '';
       renderDrawer();
       var said = 'Referral code ' + code + ' applied. Total ' + plain(shownPrice().total) + '.';
-      if (quiet) announce(said); else toast('Code ' + code + ' applied — ' + pct(STORE.referralRate) + ' off', { say: said });
+      if (!silent) { if (quiet) announce(said); else toast('Code ' + code + ' applied — ' + pct(STORE.referralRate) + ' off', { say: said }); }
       return true;
     }
     state.refDraft = typed;
@@ -2146,11 +2140,12 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
       try { (err || input).scrollIntoView({ block: 'nearest' }); } catch (e) { /* old browsers */ }
     }
+    announce(state.refError);
     return false;
   }
   function removeRef() {
     var was = state.ref;
-    state.ref = ''; state.refDraft = ''; state.refError = '';
+    state.ref = ''; state.refDraft = ''; state.refError = ''; state.coNote = '';
     storage.del(KEYS.ref);
     state.pendingId = '';
     renderDrawer();
@@ -2179,7 +2174,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       '<input class="input" id="' + id + '" data-t="ref-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24" enterkeyhint="done" placeholder="Enter code" value="' + esc(state.refDraft) + '"' +
       (state.refError ? ' aria-invalid="true"' : '') + ' aria-describedby="refErr-' + suffix + '">' +
       '<button class="btn btn-ghost btn-sm" type="button" data-t="ref-apply" style="min-height:52px">Apply</button></div>' +
-      '<p class="err" id="refErr-' + suffix + '" data-t="ref-error" role="alert">' + esc(state.refError) + '</p></div>';
+      '<p class="err" id="refErr-' + suffix + '" data-t="ref-error">' + esc(state.refError) + '</p></div>';
   }
   function thumbHTML(id) {
     var it = Pricing.item(id);
@@ -2189,19 +2184,19 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   function lineHTML(l, fresh) {
     var it = Pricing.item(l.id), bundle = it.kind === 'bundle';
     var meta = bundle ? 'Bundle of ' + it.ref.items.length : it.ref.step + ' · ' + it.ref.size;
-    var note = l.rate > 0 ? '<span class="multi" data-t="line-note">' + pct(l.rate) + ' multi-buy saving · −' + fmt(l.discount) + '</span>' : '';
+    var note = l.rate > 0 ? '<p class="multi" data-t="line-note">' + pct(l.rate) + ' multi-buy saving · −' + fmt(l.discount) + '</p>' : '';
     var atMax = l.qty >= STORE.maxQtyPerLine;
     /* the line shows quantity × price; savings are taken off once, in the summary below */
     return '<li class="line' + (fresh ? ' is-new' : '') + '" data-t="bag-line" data-id="' + l.id + '">' + thumbHTML(l.id) +
       '<div><div class="line-row"><span class="label">' + (bundle ? 'Bundle' : esc(it.ref.step)) + '</span>' +
       '<span class="price num" data-t="line-total">' + fmt(l.gross) + '</span></div>' +
       '<h3>' + esc(l.name) + '</h3>' +
-      '<p class="line-meta"><span class="size">' + esc(meta) + ' · ' + fmt(l.unit) + ' each</span>' + note + '</p>' +
+      '<p class="line-meta"><span class="size">' + esc(meta) + ' · ' + fmt(l.unit) + ' each</span></p>' +
       '<div class="line-ctrl"><div class="stepper">' +
       '<button type="button" data-t="qty-dec" aria-label="' + (l.qty === 1 ? 'Remove ' : 'Decrease quantity of ') + esc(l.name) + '">' + I.minus + '</button>' +
-      '<output data-t="qty" aria-label="Quantity">' + l.qty + '</output>' +
+      '<span class="q"><span class="vh">Quantity </span><span data-t="qty">' + l.qty + '</span></span>' +
       '<button type="button" data-t="qty-inc" aria-label="Increase quantity of ' + esc(l.name) + '"' + (atMax ? ' disabled' : '') + '>' + I.plus + '</button></div>' +
-      '<button class="remove" type="button" data-t="line-remove" aria-label="Remove ' + esc(l.name) + '">Remove</button></div></div></li>';
+      '<button class="remove" type="button" data-t="line-remove" aria-label="Remove ' + esc(l.name) + '">Remove</button></div>' + note + '</div></li>';
   }
   function suggestionHTML(s) {
     if (!s) return '';
@@ -2255,8 +2250,9 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     if (state.undo) rows.splice(Math.min(state.undo.index, rows.length), 0, undoHTML());
     var single = pr.lines.some(function (l) { return l.qty === 1; });
     var note = pr.deliveryReason === 'fee' && advanceFree ? 'Delivery is free when you pay in advance.' : 'Cash on delivery or advance payment.';
-    stepBag.innerHTML = '<div class="step-scroll">' + meterHTML() + suggestionHTML(currentSuggestion) +
-      '<ul class="lines">' + rows.join('') + '</ul>' +
+    /* the suggestion sits under the lines: when it comes and goes, no quantity button moves */
+    stepBag.innerHTML = '<div class="step-scroll">' + meterHTML() +
+      '<ul class="lines">' + rows.join('') + '</ul>' + suggestionHTML(currentSuggestion) +
       (single ? '<p class="bag-tip" data-t="bag-tip">Two of the same product saves ' + pct(STORE.multiBuy.two) + ', three or more ' + pct(STORE.multiBuy.threeOrMore) + '.</p>' : '') +
       refBox('bag') +
       '<dl class="sum sum-block">' + summaryRows(pr) + '</dl></div>' +
@@ -2265,21 +2261,35 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       '<p class="pay-note">' + note + '</p></div>';
   }
 
-  /* Re-render without dropping keyboard focus or the scroll position */
+  /* Re-render without dropping keyboard focus, and with the control that was just pressed kept
+     exactly where it was on screen, whatever appeared or disappeared above it. */
+  var pressed = null;        /* the control being pressed (phones do not move focus to a tapped button) */
+  function scrollerOf(container) {
+    var inner = $('.step-scroll', container);
+    if (inner && inner.scrollHeight > inner.clientHeight + 1) return inner;
+    return container.scrollHeight > container.clientHeight + 1 ? container : inner;   /* short screens: the step scrolls */
+  }
   function keepFocus(container, fn) {
-    var a = doc.activeElement, key = null;
-    var sc = $('.step-scroll', container), y = sc ? sc.scrollTop : 0;
-    if (a && container.contains(a)) {
-      var line = a.closest('[data-t="bag-line"]');
-      key = { t: a.getAttribute('data-t'), id: line ? line.getAttribute('data-id') : null, pos: null };
-      try { key.pos = a.selectionStart; } catch (e) { /* not a text field */ }
+    var a = doc.activeElement, focused = !!(a && a !== doc.body && container.contains(a));
+    var from = focused ? a : (pressed && container.contains(pressed) ? pressed : null), key = null, before = 0;
+    var inner = $('.step-scroll', container), y = inner ? inner.scrollTop : 0;
+    if (from) {
+      var line = from.closest('[data-t="bag-line"]');
+      key = { t: from.getAttribute('data-t'), id: line ? line.getAttribute('data-id') : null, pos: null };
+      before = from.getBoundingClientRect().top;
+      if (focused) { try { key.pos = a.selectionStart; } catch (e) { /* not a text field */ } }
     }
     fn();
-    sc = $('.step-scroll', container);
-    if (sc && y) sc.scrollTop = y;
+    inner = $('.step-scroll', container);
+    if (inner && y) inner.scrollTop = y;
     if (!key) return;
     var scope = key.id ? $('[data-t="bag-line"][data-id="' + key.id + '"]', container) : container;
     var el = key.t && scope ? $('[data-t="' + key.t + '"]', scope) : null;
+    if (el) {
+      var sc = scrollerOf(container), moved = el.getBoundingClientRect().top - before;
+      if (sc && Math.abs(moved) >= 1) sc.scrollTop += moved;
+    }
+    if (!focused) return;
     if (el && el.disabled) el = scope ? $('button:not([disabled])', scope) : null;
     if (!el) el = T('to-checkout', container) || focusables(container)[0] || T('drawer-close');
     if (el) {
@@ -2429,7 +2439,8 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       '<button class="btn btn-primary btn-sm" type="button" data-t="failed-whatsapp">' + I.wa + 'Send order on WhatsApp</button>' +
       '<button class="btn btn-ghost btn-sm" type="button" data-t="failed-retry">Try again</button></div></div>' +
       '</div>' +
-      '<div class="step-foot"><dl class="total-row" data-t="sum-row" data-row="total"><dt>Total</dt><dd data-t="sum-value" class="num" id="coTotal"></dd></dl>' +
+      '<div class="step-foot"><p class="foot-note" id="coNote" data-t="checkout-note" hidden></p>' +
+      '<dl class="total-row" data-t="sum-row" data-row="total"><dt>Total</dt><dd data-t="sum-value" class="num" id="coTotal"></dd></dl>' +
       '<button class="btn btn-primary btn-block" type="submit" data-t="place-order" id="placeOrder"></button>' +
       '<button class="link back" type="button" data-t="back-to-bag">Back to bag</button></div>';
     updateCheckout();
@@ -2449,6 +2460,9 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     $('#coLines').innerHTML = pr.lines.map(receiptLine).join('');
     $('#coSum').innerHTML = summaryRows(pr);
     $('#coTotal').textContent = fmt(pr.total);
+    var noteEl = $('#coNote');
+    noteEl.textContent = state.coNote || '';
+    noteEl.hidden = !state.coNote;
     /* the button stays focusable while sending (so focus is not lost); a second press is ignored */
     var btn = $('#placeOrder');
     btn.setAttribute('aria-disabled', state.sending ? 'true' : 'false');
@@ -2513,7 +2527,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   function settleRef(where) {
     var typed = state.refDraft.trim();
     if (!typed || state.ref) return true;
-    var ok = applyRef(typed, where !== 'bag');
+    var ok = applyRef(typed, true, where !== 'bag');
     var scope = where === 'bag' ? stepBag : stepCheckout;
     if (!ok) { var input = T('ref-input', scope); if (input) { input.focus(); try { input.scrollIntoView({ block: 'center' }); } catch (e) { /* ignore */ } } return false; }
     return where === 'bag';        /* in checkout: stop once so the customer sees the new total before ordering */
@@ -2600,7 +2614,11 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     if (!state.bag.length) { showStep('bag'); return false; }
     state.submitted = true;
     if (!settleRef('checkout')) {
-      if (state.ref) toast('Code applied. Your total is now ' + plain(priceNow().total) + ' — check it, then place your order.', { ms: 6000 });
+      if (state.ref) {
+        state.coNote = 'Code ' + state.ref + ' applied. Your total is now ' + plain(priceNow().total) + '. Check it, then place your order.';
+        updateCheckout();
+        announce(state.coNote);
+      }
       return false;
     }
     if (validateAll().length) return false;
@@ -2611,7 +2629,9 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
   function placeOrder() {
     if (!preflight()) return;
     var o = buildOrder('email');
-    state.sending = true; state.failed = false;
+    var panelWas = $('#coFailed');
+    if (panelWas && panelWas.contains(doc.activeElement)) $('#placeOrder').focus();
+    state.sending = true; state.failed = false; state.coNote = '';
     updateCheckout();
     announce('Placing your order…');
     sendOrder(o).then(function (ok) {
@@ -2703,6 +2723,8 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     var el = e.target.closest('[data-t]');
     if (!el || !drawer.contains(el)) return;
     if (overlay.cur !== 'bag' || tooSoon()) { e.preventDefault(); return; }   /* stray second tap: do nothing */
+    pressed = e.target.closest('button,a,input,[data-t]') || el;
+    window.setTimeout(function () { pressed = null; }, 0);
     var t = el.getAttribute('data-t');
     var line = el.closest('[data-t="bag-line"]'), id = line ? line.getAttribute('data-id') : null;
     if (t === 'drawer-close') closeOverlay();
@@ -2726,7 +2748,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     else if (t === 'ref-apply') { var inp = T('ref-input', el.closest('.refbox')); applyRef(inp ? inp.value : '', true); }
     else if (t === 'ref-remove') removeRef();
     else if (t === 'to-checkout') goToCheckout();
-    else if (t === 'back-to-bag') { flushDraft(); showStep('bag'); }
+    else if (t === 'back-to-bag') { flushDraft(); state.coNote = ''; updateCheckout(); showStep('bag'); }
     else if (t === 'order-whatsapp' || t === 'failed-whatsapp') orderOnWhatsApp();
     else if (t === 'failed-retry') placeOrder();
     else if (t === 'copy') {
@@ -2804,7 +2826,7 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     e.preventDefault();
     if (el.type === 'radio' || el.type === 'checkbox') return;
     var at = FIELD_ORDER.indexOf(el.id), next = at >= 0 ? $('#' + FIELD_ORDER[at + 1]) : null;
-    if (next) next.focus(); else el.blur();
+    if (next) next.focus(); else $('#placeOrder').focus();
   });
   var submitArmed = false;
   stepCheckout.addEventListener('click', function (e) { submitArmed = !!e.target.closest('#placeOrder'); }, true);
@@ -2851,10 +2873,10 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
       detailsHTML('How to use', '<ol>' + p.howToUse.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>') +
       detailsHTML('Precautions', '<ul class="dash">' + p.precautions.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>') +
       '</div>' + together + '</div>' +
-      '<p class="sheet-saving" id="sheetSaving" aria-live="polite"></p>' +
+      '<p class="sheet-saving" id="sheetSaving"></p>' +
       '<div class="sheet-foot"><div class="stepper">' +
       '<button type="button" data-t="sheet-qty-dec" aria-label="Decrease quantity">' + I.minus + '</button>' +
-      '<output data-t="sheet-qty" aria-label="Quantity">1</output>' +
+      '<span class="q"><span class="vh">Quantity </span><span data-t="sheet-qty">1</span></span>' +
       '<button type="button" data-t="sheet-qty-inc" aria-label="Increase quantity">' + I.plus + '</button></div>' +
       '<button class="btn btn-primary" type="button" data-t="sheet-add"></button></div></div>';
     updateSheet();
@@ -2892,8 +2914,11 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     if (overlay.cur !== 'product' || tooSoon()) return;
     var t = el.getAttribute('data-t');
     if (t === 'sheet-close') closeOverlay();
-    else if (t === 'sheet-qty-inc') { state.sheet.qty++; updateSheet(); }
-    else if (t === 'sheet-qty-dec') { state.sheet.qty--; updateSheet(); }
+    else if (t === 'sheet-qty-inc' || t === 'sheet-qty-dec') {
+      state.sheet.qty += t === 'sheet-qty-inc' ? 1 : -1;
+      updateSheet();
+      announce('Quantity ' + state.sheet.qty + '. ' + $('#sheetSaving').textContent);
+    }
     else if (t === 'sheet-add') addToBag(state.sheet.id, state.sheet.qty, overlay.opener);
     else if (t === 'sheet-prev' || t === 'sheet-next') {
       var n = PRODUCTS.length, i = PRODUCTS.indexOf(productById[state.sheet.id]);
@@ -2912,25 +2937,8 @@ function createPricing(STORE, PRODUCTS, BUNDLES, REFERRAL_CODES) {
     if (hasThreshold) msgs.push('Free delivery on orders of ' + fmt(STORE.delivery.freeOver) + ' or more');
     msgs.push('Buy 2 of the same product, save ' + pct(STORE.multiBuy.two) + ' — 3 or more, save ' + pct(STORE.multiBuy.threeOrMore));
     msgs.push(advanceFree ? 'Cash on delivery, or pay in advance for free delivery' : 'Cash on delivery across Pakistan');
-    var ul = $('#announce');
-    ul.setAttribute('aria-hidden', 'true');
-    ul.innerHTML = msgs.map(function (m, i) { return '<li' + (i === 0 ? ' class="is-on"' : '') + '>' + m + '</li>'; }).join('');
-    var sr = doc.createElement('p');
-    sr.className = 'vh';
-    sr.textContent = msgs.join('. ') + '.';
-    ul.parentNode.appendChild(sr);
-    if (reducedMotion || msgs.length < 2) return;
-    /* shows each message twice, then rests on the first: nothing on the page moves for ever */
-    var at = 0, turns = 0, items = $$('li', ul), held = false;
-    ul.addEventListener('pointerenter', function () { held = true; });
-    ul.addEventListener('pointerleave', function () { held = false; });
-    var timer = window.setInterval(function () {
-      if (doc.hidden || held) return;
-      items[at].classList.remove('is-on');
-      at = (at + 1) % items.length;
-      items[at].classList.add('is-on');
-      if (at === 0 && ++turns >= 2) window.clearInterval(timer);
-    }, 5200);
+    /* all messages are in the page; wide screens show them side by side, narrow ones the first */
+    $('#announce').innerHTML = msgs.map(function (m) { return '<li>' + m + '</li>'; }).join('');
   }
   function renderStage() {
     var stage = $('#stage');
